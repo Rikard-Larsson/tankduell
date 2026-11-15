@@ -245,7 +245,7 @@ function openOnline(action, code){
  ws.onmessage=e=>{if(net.ws!==ws)return;try{handleNetworkMessage(JSON.parse(e.data))}catch(err){console.warn('Ogiltigt servermeddelande',err)}};
  ws.onerror=()=>{};
  ws.onclose=()=>{if(net.ws!==ws)return;net.ws=null;net.role=null;net.peer=false;net.code='';remoteInput={f:false,b:false,l:false,r:false,shoot:false};keys.clear();phase='menu';resetGame();setMode('online');showPanel('menu');showNetError('Anslutningen bröts. Kontrollera att onlineservern är igång och försök igen.');};
- setTimeout(()=>{if(net.ws===ws&&ws.readyState===0){ws.close();showNetError('Servern svarar inte.')}} ,9000);
+ setTimeout(()=>{if(net.ws===ws&&ws.readyState===0){ws.close();showNetError('Servern svarar inte.')}} ,90000);
  ws.addEventListener('open',()=>{ $('startBtn').disabled=false;$('joinBtn').disabled=false;});
  ws.addEventListener('close',()=>{ $('startBtn').disabled=false;$('joinBtn').disabled=false;});
 }
@@ -256,7 +256,7 @@ $('joinBtn').addEventListener('click',joinRoom);$('roomInput').addEventListener(
 $('onlineStart').addEventListener('click',startRoomMatch);$('leaveBtn').addEventListener('click',menuGame);
 $('copyLinkBtn').addEventListener('click',async()=>{const text=inviteUrl();try{await navigator.clipboard.writeText(text);$('copyLinkBtn').textContent='✓ LÄNK KOPIERAD';setTimeout(()=>$('copyLinkBtn').textContent='KOPIERA INBJUDNINGSLÄNK',2000)}catch(e){window.prompt('Kopiera länken och skicka till din kompis:',text)}});
 const sharedCode=new URLSearchParams(location.search).get('room');
-if(sharedCode&&/^[A-HJ-NP-Z2-9]{6}$/i.test(sharedCode)){setMode('online');$('roomInput').value=sharedCode.toUpperCase();}
+if(sharedCode&&/^[A-HJ-NP-Z2-9]{6}$/i.test(sharedCode)){setMode('online');$('roomInput').value=sharedCode.toUpperCase();setTimeout(()=>{if(!net.ws&&phase==='menu')joinRoom();},100);}
 $('startBtn').addEventListener('click',()=>{if(mode==='online')createRoom();else startGame()});$('againBtn').addEventListener('click',()=>{if(mode==='online')startRoomMatch();else startGame()});$('resumeBtn').addEventListener('click',pauseGame);$('backBtn').addEventListener('click',menuGame);$('menuBtn').addEventListener('click',menuGame);ui.pauseBtn.addEventListener('click',pauseGame);
 $('modeVersus').addEventListener('click',()=>setMode('versus'));$('modeBot').addEventListener('click',()=>setMode('bot'));$('modeOnline').addEventListener('click',()=>setMode('online'));
 function setMode(newMode){mode=newMode;for(const [id,m] of [['modeVersus','versus'],['modeBot','bot'],['modeOnline','online']]){$(id).classList.toggle('selected',mode===m);$(id).setAttribute('aria-pressed',String(mode===m))} $('onlineJoin').hidden=mode!=='online';$('startBtn').textContent=mode==='online'?'SKAPA ONLINERUM →':'STARTA STRIDEN →';$('onlineError').hidden=true;}
