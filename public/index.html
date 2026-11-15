@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#09111d">
 <meta name="description" content="Tankduell – spela pansarvagnsduell online med en kompis från valfri stad, eller kör lokalt och mot datorn.">
-<title>TANKDUELL ONLINE — Arena 1v1</title>
+<title>TANKDUELL ONLINE — Arena 1v1 · Mobilstyrning V2</title>
 <style>
 :root{--bg:#080e18;--panel:#101b29;--panel2:#152233;--line:#2b3a4d;--text:#f0f6f5;--sub:#91a6ae;--green:#b5f078;--orange:#ff996f;--cyan:#62d8da;--shadow:0 24px 85px #0008;--r:18px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(ellipse 60% 40% at 50% -5%,#173e3e55,transparent 80%),radial-gradient(ellipse 45% 45% at 0 75%,#1c2d4350,transparent),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.006em;overflow-x:hidden}
@@ -34,6 +34,78 @@ body:before{content:"";position:fixed;inset:0;background-image:linear-gradient(#
 
 .touchpanel.guest .touch-header{color:var(--orange)}.touchpanel.guest .touchbtn.held{background:var(--orange);color:#281813;border-color:var(--orange)}.touchpanel.guest .touchbtn.firebtn{background:#4c302c;border-color:#d08a6c;color:#ffad8d}
 @media(max-width:630px){.field-wrap:has(#onlineJoin:not([hidden])){min-height:600px}.field-wrap:has(#onlineJoin:not([hidden])) canvas{height:600px;aspect-ratio:auto}.field-wrap:has(#onlineScreen:not([hidden])){min-height:500px}.field-wrap:has(#onlineScreen:not([hidden])) canvas{height:500px;aspect-ratio:auto}}
+
+/* V2: joystick, multi-touch and aspect-ratio fix. All changes work with the existing online server. */
+.field-wrap canvas{width:100%;aspect-ratio:16/9;height:auto}
+body.match-active .field-wrap{aspect-ratio:16/9!important;min-height:0!important;height:auto!important;}
+body.match-active .field-wrap canvas{aspect-ratio:16/9!important;width:100%!important;height:auto!important;}
+.touchpanel{display:none;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:12px;}
+.touchpanel .touch-group{padding:12px 18px 15px;min-width:0;background:linear-gradient(130deg,#182c37,#101e2a);border-color:#375366;}
+.touch-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:5px}
+.touchpanel .touch-header{font-size:12px;letter-spacing:.12em;margin:0}
+.touch-hint{font-size:9px;font-weight:800;letter-spacing:.09em;color:#809eaa;text-align:right}
+.touchpanel .touch-buttons{display:flex;align-items:center;justify-content:space-around;gap:24px;}
+.joystick{touch-action:none;-webkit-user-select:none;user-select:none;position:relative;flex:0 0 auto;width:134px;height:134px;border-radius:50%;border:2px solid #4e6979;background:radial-gradient(circle at 50% 50%,#203748 0 39%,#162733 40% 65%,#10202b 100%);box-shadow:inset 0 5px 25px #0007,0 5px 20px #0005;cursor:grab;overflow:hidden}
+.joystick.active{border-color:#b5f078;box-shadow:inset 0 5px 25px #0008,0 0 0 2px #b5f07838;cursor:grabbing}
+.stick-ring{position:absolute;inset:17px;border:1px solid #85a4a83c;border-radius:50%;pointer-events:none}
+.stick-cross{position:absolute;background:#9ebbbd21;pointer-events:none}
+.stick-cross-v{height:86%;width:1px;top:7%;left:50%}.stick-cross-h{width:86%;height:1px;left:7%;top:50%}
+.stick-knob{position:absolute;left:50%;top:50%;width:62px;height:62px;transform:translate(-50%,-50%);border-radius:50%;border:2px solid #8daeb5;background:radial-gradient(circle at 36% 25%,#395867,#27414e 55%,#1e3440);box-shadow:0 5px 14px #0008,inset 0 3px 8px #ffffff13;pointer-events:none;transition:background .12s}
+.joystick.active .stick-knob{border-color:#ccfa92;background:radial-gradient(circle at 30% 30%,#658d6a,#355c49 70%,#254034)}
+.touchpanel .touchbtn.firebtn{touch-action:none;user-select:none;-webkit-user-select:none;flex:0 0 auto;width:92px;height:92px;border-radius:50%;border:3px solid #79bb75;background:radial-gradient(circle at 35% 22%,#376044,#243e33 75%);color:#c9ff9a;font-weight:950;font-size:13px;letter-spacing:.09em;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;box-shadow:0 5px 0 #11251c,0 12px 22px #0005;}
+.touchpanel .touchbtn.firebtn .fire-symbol{font-size:27px;line-height:1}
+.touchpanel .touchbtn.firebtn small{font-size:8px;letter-spacing:.12em;margin-top:3px;color:#98c59b}
+.touchpanel .touchbtn.firebtn.held{transform:translateY(4px);background:var(--green);color:#122319;box-shadow:0 1px 0 #11251c;}
+.touchpanel.guest .touch-header,.touchpanel #touchP2 .touch-header{color:var(--orange)}
+.touchpanel.guest .joystick.active,#touchP2 .joystick.active{border-color:var(--orange);box-shadow:0 0 0 2px #ff996f38,inset 0 5px 25px #0008}
+.touchpanel.guest .joystick.active .stick-knob,#touchP2 .joystick.active .stick-knob{border-color:var(--orange)}
+.touchpanel.guest .touchbtn.firebtn,#touchP2 .touchbtn.firebtn{background:radial-gradient(circle at 35% 22%,#6a4536,#432e2a 75%);border-color:#c17f67;color:#ffb49b}
+.touchpanel.guest .touchbtn.firebtn.held,#touchP2 .touchbtn.firebtn.held{background:var(--orange);color:#2a1a16}
+.mobile-orient-hint{grid-column:1/-1;text-align:center;color:#a0b6bd;font-size:11px;font-weight:750;letter-spacing:.04em;display:none}
+@media(pointer:coarse),(max-width:700px){
+ body.match-active .touchpanel{display:grid}
+ body.match-active .hero,body.match-active .controls,body.match-active .about{display:none}
+ body.match-active .top{margin-bottom:10px}
+ body.match-active .topright{font-size:9px}
+ body.match-active .site{padding-bottom:14px}
+ .touchpanel{grid-template-columns:1fr}
+ .touchpanel .touch-group{padding:10px 18px}
+ .touchpanel .touch-buttons{justify-content:space-around;gap:12px}
+ .joystick{width:132px;height:132px}
+ .mobile-orient-hint{display:block}
+}
+@media(max-width:420px){
+ .touchpanel .touch-buttons{justify-content:space-between;padding-inline:clamp(4px,6vw,24px)}
+ .touchpanel .touchbtn.firebtn{width:88px;height:88px}
+ .touchpanel .touch-hint{font-size:8px}
+ body.match-active .arena-footer{padding:6px 5px 2px;justify-content:center}
+ body.match-active .arena-footer span:nth-child(2),body.match-active .arena-footer span:nth-child(3){display:none}
+}
+@media(orientation:landscape) and (max-height:540px) and (pointer:coarse){
+ body.match-active .site{max-width:none;padding:3px 8px 7px}
+ body.match-active .top{margin:0 0 3px}
+ body.match-active .top .brand{font-size:12px}
+ body.match-active .top .brand small{display:none}
+ body.match-active .top .logo{width:26px;height:26px}
+ body.match-active .topright{display:none}
+ body.match-active .game-shell{padding:3px;max-width:min(69vw,calc((100dvh - 65px)*16/9));margin:auto}
+ body.match-active .scorebar{min-height:34px;padding:2px 8px}
+ body.match-active .scorebar .digits{font-size:18px}
+ body.match-active .scorebar .player-sub,body.match-active .scorebar .heart-row,body.match-active .scorebar .target{display:none}
+ body.match-active .scorebar .colorbar{height:20px}
+ body.match-active .scorebar .clock{font-size:17px}
+ body.match-active .arena-footer{display:none}
+ body.match-active .touchpanel{position:fixed;z-index:10;inset:0;display:block;margin:0;pointer-events:none}
+ body.match-active .touchpanel .touch-group{position:fixed;bottom:max(8px,env(safe-area-inset-bottom));left:max(8px,env(safe-area-inset-left));background:transparent;border:0;padding:0;pointer-events:none}
+ body.match-active .touchpanel .touch-meta{display:none}
+ body.match-active .touchpanel .touch-buttons{display:contents}
+ body.match-active .touchpanel .joystick{position:fixed;left:max(12px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom));width:112px;height:112px;pointer-events:auto}
+ body.match-active .touchpanel .touchbtn.firebtn{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom));width:80px;height:80px;pointer-events:auto}
+ body.match-active .touchpanel .mobile-orient-hint{display:none}
+ body.match-active .touchpanel #touchP2{left:125px}
+ body.match-active .touchpanel #touchP2 .joystick{left:125px;bottom:max(12px,env(safe-area-inset-bottom))}
+ body.match-active .touchpanel #touchP2 .touchbtn.firebtn{right:115px}
+}
 </style>
 </head>
 <body>
@@ -107,9 +179,28 @@ body:before{content:"";position:fixed;inset:0;background-image:linear-gradient(#
     </div>
     <div class="arena-footer"><span class="live"><i class="ring-dot"></i> <span id="statusText">REDO FÖR STRID</span></span><span>RÖR DIG <b class="separator">/</b> SIKTA <b class="separator">/</b> SKJUT <b class="separator">/</b> ÖVERLEV</span><span>100% BROWSER GAME</span></div>
   </section>
-  <div class="touchpanel" id="touchpanel" aria-label="Pekkontroller">
-    <div class="touch-group"><div class="touch-header">01 / GRÖN</div><div class="touch-buttons"><div class="touch-dpad"><span class="touchbtn ghost"></span><button class="touchbtn" data-control="KeyW" aria-label="Grön framåt">▲</button><span class="touchbtn ghost"></span><button class="touchbtn" data-control="KeyA" aria-label="Grön vänster">◀</button><span class="touchbtn ghost"></span><button class="touchbtn" data-control="KeyD" aria-label="Grön höger">▶</button><span class="touchbtn ghost"></span><button class="touchbtn" data-control="KeyS" aria-label="Grön bakåt">▼</button><span class="touchbtn ghost"></span></div><button class="touchbtn firebtn" data-control="KeyF" aria-label="Grön skjut">SKJUT</button></div></div>
-    <div class="touch-group" id="touchP2"><div class="touch-header">02 / ORANGE</div><div class="touch-buttons"><div class="touch-dpad"><span class="touchbtn ghost"></span><button class="touchbtn" data-control="ArrowUp" aria-label="Orange framåt">▲</button><span class="touchbtn ghost"></span><button class="touchbtn" data-control="ArrowLeft" aria-label="Orange vänster">◀</button><span class="touchbtn ghost"></span><button class="touchbtn" data-control="ArrowRight" aria-label="Orange höger">▶</button><span class="touchbtn ghost"></span><button class="touchbtn" data-control="ArrowDown" aria-label="Orange bakåt">▼</button><span class="touchbtn ghost"></span></div><button class="touchbtn firebtn" data-control="Enter" aria-label="Orange skjut">SKJUT</button></div></div>
+  <div class="touchpanel" id="touchpanel" aria-label="Mobila spelkontroller">
+    <div class="touch-group" id="touchP1">
+      <div class="touch-meta"><div class="touch-header">01 / GRÖN</div><div class="touch-hint">DRA FÖR ATT KÖRA OCH SVÄNGA</div></div>
+      <div class="touch-buttons">
+        <div class="joystick" data-stick="1" aria-label="Styrspak spelare 1. Dra uppåt för att köra, åt sidorna för att svänga." role="group">
+          <span class="stick-ring"></span><span class="stick-cross stick-cross-v"></span><span class="stick-cross stick-cross-h"></span>
+          <span class="stick-knob"></span>
+        </div>
+        <button type="button" class="touchbtn firebtn" data-control="KeyF" aria-label="Skjut med grön pansarvagn. Håll för upprepad eldgivning."><span class="fire-symbol">◎</span>SKJUT<small>HÅLL IN</small></button>
+      </div>
+    </div>
+    <div class="touch-group" id="touchP2">
+      <div class="touch-meta"><div class="touch-header">02 / ORANGE</div><div class="touch-hint">DRA FÖR ATT KÖRA OCH SVÄNGA</div></div>
+      <div class="touch-buttons">
+        <div class="joystick" data-stick="2" aria-label="Styrspak spelare 2. Dra uppåt för att köra, åt sidorna för att svänga." role="group">
+          <span class="stick-ring"></span><span class="stick-cross stick-cross-v"></span><span class="stick-cross stick-cross-h"></span>
+          <span class="stick-knob"></span>
+        </div>
+        <button type="button" class="touchbtn firebtn" data-control="Enter" aria-label="Skjut med orange pansarvagn. Håll för upprepad eldgivning."><span class="fire-symbol">◎</span>SKJUT<small>HÅLL IN</small></button>
+      </div>
+    </div>
+    <div class="mobile-orient-hint">↻ Vänd mobilen liggande för större spelplan</div>
   </div>
   <div class="controls">
     <div class="control-card"><div class="control-head"><div class="control-icon">01</div><div><div class="control-name">Spelare 1</div><div class="control-sub">Grön pansarvagn</div></div></div><div class="keygroup"><div><div class="keyrow"><span class="key">W</span><div><span class="key">A</span><span class="key">S</span><span class="key">D</span></div></div><div class="actionlabel">STYR</div></div><div><span class="key fire">F / SPACE</span><div class="actionlabel">SKJUT</div></div></div></div>
@@ -127,6 +218,9 @@ const ui={overlay:$('overlay'),menu:$('menuScreen'),pause:$('pauseScreen'),win:$
 let phase='menu',mode='versus',selectedMap=0,game=null,muted=false,ctxAudio=null,lastTime=0,drawFrame=0,keys=new Set(),shake=0;
 const net={ws:null,code:'',role:null,peer:false,lastInput:0,lastState:0,notice:''};
 let remoteInput={f:false,b:false,l:false,r:false,shoot:false};
+const touchHeld=new Set();
+const pressed=code=>keys.has(code)||touchHeld.has(code);
+const clearTouch=()=>{touchHeld.clear();document.querySelectorAll('.joystick').forEach(el=>{el.classList.remove('active');const knob=el.querySelector('.stick-knob');if(knob)knob.style.transform='translate(-50%,-50%)'});document.querySelectorAll('.touchbtn.held').forEach(el=>el.classList.remove('held'));};
 const maps=[
 {title:'ÖKENPOSTEN',floor:'#1a302c',accent:'#395645',obstacles:[
 {x:568,y:130,w:64,h:164,t:'steel'},{x:568,y:381,w:64,h:164,t:'steel'},
@@ -156,7 +250,7 @@ function spark(x,y,color,n=6){burst(x,y,color,n,90)}
 function circleRect(x,y,r,o){const nx=clamp(x,o.x,o.x+o.w),ny=clamp(y,o.y,o.y+o.h);return dist2(x,y,nx,ny)<r*r;}
 function blocked(x,y,r,tank){if(x-r<EDGE||x+r>W-EDGE||y-r<EDGE||y+r>H-EDGE)return true;for(const o of game.obstacles){if(o.hp>0&&circleRect(x,y,r,o))return true;}for(const t of game.tanks){if(t!==tank&&t.alive&&dist2(x,y,t.x,t.y)<(r+23)**2)return true;}return false;}
 function reposition(t){const is1=t.id===1,other=game.tanks[is1?1:0],candidates=is1?[[140,337,0],[140,185,.25],[140,490,-.25],[245,337,0]]:[[1060,337,Math.PI],[1060,185,2.9],[1060,490,3.4],[955,337,Math.PI]];for(const [x,y,a] of candidates){if(!game.obstacles.some(o=>o.hp>0&&circleRect(x,y,27,o))&&(!other.alive||dist2(x,y,other.x,other.y)>160**2)){t.x=x;t.y=y;t.a=a;break;}}t.hp=MAX_HP;t.inv=1.15;t.alive=true;t.muzzle=0;t.cool=.3;burst(t.x,t.y,t.color,15,75);}
-function controls(t){if(t.id===1)return {f:keys.has('KeyW'),b:keys.has('KeyS'),l:keys.has('KeyA'),r:keys.has('KeyD'),shoot:keys.has('KeyF')||keys.has('Space')};if(mode==='bot')return botControls(t);if(mode==='online')return remoteInput;return{f:keys.has('ArrowUp'),b:keys.has('ArrowDown'),l:keys.has('ArrowLeft'),r:keys.has('ArrowRight'),shoot:keys.has('Enter')||keys.has('NumpadEnter')}}
+function controls(t){if(t.id===1)return {f:pressed('KeyW'),b:pressed('KeyS'),l:pressed('KeyA'),r:pressed('KeyD'),shoot:pressed('KeyF')||pressed('Space')};if(mode==='bot')return botControls(t);if(mode==='online')return remoteInput;return{f:pressed('ArrowUp'),b:pressed('ArrowDown'),l:pressed('ArrowLeft'),r:pressed('ArrowRight'),shoot:pressed('Enter')||pressed('NumpadEnter')}}
 function canSee(a,b){for(let i=1;i<=12;i++){let x=a.x+(b.x-a.x)*i/12,y=a.y+(b.y-a.y)*i/12;for(const o of game.obstacles){if(o.hp>0&&x>o.x-5&&x<o.x+o.w+5&&y>o.y-5&&y<o.y+o.h+5)return false}}return true;}
 function botControls(t){const target=game.tanks[0];if(!target.alive)return{f:false,b:false,l:false,r:false,shoot:false};t.botTime-=1/60;if(t.botTime<=0){t.botTime=rand(.6,1.5);t.botShift=Math.random()>.5?1:-1;}let angle=Math.atan2(target.y-t.y,target.x-t.x),diff=normAngle(angle-t.a),d=Math.hypot(target.x-t.x,target.y-t.y),see=canSee(t,target),aheadX=t.x+Math.cos(t.a)*73,aheadY=t.y+Math.sin(t.a)*73;let obstacle=game.obstacles.some(o=>o.hp>0&&circleRect(aheadX,aheadY,27,o));let turn=obstacle?t.botShift:Math.sign(diff);if(Math.abs(diff)<.07&&!obstacle)turn=0;return{f:d>185||!see,b:d<115,l:turn<0,r:turn>0,shoot:see&&Math.abs(diff)<.19&&d<780};}
 function addMark(t){const a=t.a+Math.PI/2;for(const side of [-1,1]){game.marks.push({x:t.x+Math.cos(a)*side*20,y:t.y+Math.sin(a)*side*20,a:t.a,life:4.5})}if(game.marks.length>180)game.marks.splice(0,game.marks.length-180);}
@@ -188,13 +282,13 @@ function drawTank(t){if(!t.alive)return;if(t.inv>0&&Math.floor(t.inv*13)%2===0){
  c.globalAlpha=1;c.fillStyle='#0b1c20bb';rounded(t.x-25,t.y-47,50,7,4);c.fill();const f=t.hp/MAX_HP;rounded(t.x-24,t.y-46,48*f,5,3);c.fillStyle=t.hp===1?'#ff6d71':t.color;c.fill();c.font='900 12px ui-sans-serif, system-ui';c.fillStyle=t.color;c.textAlign='center';c.shadowColor='#000';c.shadowBlur=7;c.fillText('0'+t.id,t.x,t.y-54);c.shadowBlur=0;if(t.inv>.3){c.beginPath();c.arc(t.x,t.y,34,0,TAU);c.strokeStyle=t.color+'45';c.lineWidth=2;c.stroke();}}
 function drawPickup(p){const y=p.y+Math.sin(p.spin*3)*5;c.save();c.translate(p.x,y);c.rotate(p.spin*.8);c.shadowColor='#83ffe8';c.shadowBlur=22;c.fillStyle='#264a4d';c.strokeStyle='#83ffe8';c.lineWidth=2;rounded(-16,-16,32,32,7);c.fill();c.stroke();fillRect(-3,-10,6,20,'#a1ffe4');fillRect(-10,-3,20,6,'#a1ffe4');c.restore();c.beginPath();c.arc(p.x,p.y,27+Math.sin(p.spin*4)*4,0,TAU);c.strokeStyle='#83ffe842';c.lineWidth=2;c.stroke();}
 function drawGame(){c.save();c.clearRect(0,0,W,H);c.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);drawBackdrop();if(game){for(const m of game.marks){c.save();c.globalAlpha=clamp(m.life/4.5,0,.2);c.translate(m.x,m.y);c.rotate(m.a);fillRect(-4,-3,8,6,'#0b1117');c.restore()}for(const o of game.obstacles)drawObstacle(o);for(const p of game.pickups)drawPickup(p);for(const t of game.tanks)drawTank(t);for(const b of game.bullets){c.save();c.strokeStyle='#ffe9a878';c.lineWidth=5;c.lineCap='round';c.beginPath();c.moveTo(b.x-b.vx*.016,b.y-b.vy*.016);c.lineTo(b.x,b.y);c.stroke();c.shadowColor='#ffe59b';c.shadowBlur=15;c.beginPath();c.arc(b.x,b.y,5,0,TAU);c.fillStyle='#fff2bc';c.fill();c.restore()}for(const p of game.particles){c.globalAlpha=clamp(p.life/p.max,0,1);fillRect(p.x,p.y,p.size,p.size,p.color)}c.globalAlpha=1;if(game.messageTimer>0&&phase==='playing'){let opacity=clamp(game.messageTimer*1.8,0,1);c.save();c.globalAlpha=opacity;c.textAlign='center';c.font='950 36px ui-sans-serif, system-ui';c.shadowColor='#000';c.shadowBlur=20;c.fillStyle='#f5f9df';c.fillText(game.message,W/2,105);c.restore()}}c.restore();}
-function resize(){const r=cv.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));c.setTransform(cv.width/W,0,0,cv.height/H,0,0);drawGame();}
+function resize(){const r=cv.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);const nw=Math.max(1,Math.round(r.width*dpr)),nh=Math.max(1,Math.round(r.height*dpr));if(cv.width!==nw)cv.width=nw;if(cv.height!==nh)cv.height=nh;const scale=Math.min(nw/W,nh/H);c.setTransform(scale,0,0,scale,(nw-W*scale)/2,(nh-H*scale)/2);drawGame();}
 function syncUI(){if(!game)return;ui.score1.textContent=game.scores[0];ui.score2.textContent=game.scores[1];ui.clock.textContent=`${String(Math.floor(game.time/60)).padStart(2,'0')}:${String(Math.floor(game.time%60)).padStart(2,'0')}`;ui.arena.textContent=maps[selectedMap].title;for(let i=0;i<2;i++){let e=i?ui.hp2:ui.hp1;const hp=game.tanks[i].alive?game.tanks[i].hp:0;e.innerHTML=Array.from({length:MAX_HP},(_,j)=>`<span class="hp ${j<hp?'on':''}"></span>`).join('');e.setAttribute('aria-label',`Spelare ${i+1}: ${hp} av ${MAX_HP} hälsa`)}}
-function showPanel(which){ui.overlay.hidden=which==='none';ui.menu.hidden=which!=='menu';ui.pause.hidden=which!=='pause';ui.win.hidden=which!=='win';$('onlineScreen').hidden=which!=='online';ui.pauseLabel.textContent=mode==='online'?'ONLINE':phase==='paused'?'FORTSÄTT':'PAUS';ui.pauseBtn.disabled=mode==='online';ui.pauseBtn.setAttribute('aria-label',mode==='online'?'Online-match utan paus':phase==='paused'?'Fortsätt spelet':'Pausa spelet');ui.status.textContent=phase==='playing'?'MATCH PÅGÅR':phase==='paused'?'MATCH PAUSAD':phase==='win'?'MATCH AVSLUTAD':which==='online'?'ONLINE / VÄNTAR':'REDO FÖR STRID';}
+function showPanel(which){document.body.classList.toggle('match-active',which==='none'&&phase==='playing');ui.overlay.hidden=which==='none';ui.menu.hidden=which!=='menu';ui.pause.hidden=which!=='pause';ui.win.hidden=which!=='win';$('onlineScreen').hidden=which!=='online';ui.pauseLabel.textContent=mode==='online'?'ONLINE':phase==='paused'?'FORTSÄTT':'PAUS';ui.pauseBtn.disabled=mode==='online';ui.pauseBtn.setAttribute('aria-label',mode==='online'?'Online-match utan paus':phase==='paused'?'Fortsätt spelet':'Pausa spelet');ui.status.textContent=phase==='playing'?'MATCH PÅGÅR':phase==='paused'?'MATCH PAUSAD':phase==='win'?'MATCH AVSLUTAD':which==='online'?'ONLINE / VÄNTAR':'REDO FÖR STRID';requestAnimationFrame(resize);}
 function showWin(t){const who=t.id===1?'GRÖN':mode==='bot'?'DATORN':'ORANGE';$('winTitle').innerHTML=who+' <span class="accent">VINNER!</span>';$('winTitle').style.color=t.color;$('winDescription').textContent=t.id===1?'Snyggt kört! Vill du försvara din titel?':'En imponerande seger. Dags för revansch?';$('winScore1').textContent=game.scores[0];$('winScore2').textContent=game.scores[1];showPanel('win')}
-function startGame(){keys.clear();resetGame();phase='playing';ui.p2Name.textContent=mode==='bot'?'DATORN / AI':mode==='online'?'MOTSTÅNDARE ONLINE':'SPELARE 02';$('touchP2').style.display=(mode==='bot'||mode==='online')?'none':'';document.querySelector('.touch-group .touch-header').textContent=mode==='online'&&net.role==='guest'?'02 / ORANGE':'01 / GRÖN';$('touchpanel').classList.toggle('guest',mode==='online'&&net.role==='guest');$('rematchHint').hidden=!(mode==='online'&&net.role==='guest');$('againBtn').hidden=mode==='online'&&net.role==='guest';showPanel('none');try{ctxAudio=ctxAudio||new (window.AudioContext||window.webkitAudioContext)();ctxAudio.resume()}catch(e){}}
-function pauseGame(){if(mode==='online')return;if(phase==='playing'){phase='paused';keys.clear();showPanel('pause')}else if(phase==='paused'){phase='playing';showPanel('none')}}
-function menuGame(){leaveOnline();phase='menu';keys.clear();resetGame();showPanel('menu')}
+function startGame(){keys.clear();clearTouch();resetGame();phase='playing';ui.p2Name.textContent=mode==='bot'?'DATORN / AI':mode==='online'?'MOTSTÅNDARE ONLINE':'SPELARE 02';$('touchP2').style.display=(mode==='bot'||mode==='online')?'none':'';document.querySelector('.touch-group .touch-header').textContent=mode==='online'&&net.role==='guest'?'02 / ORANGE':'01 / GRÖN';$('touchpanel').classList.toggle('guest',mode==='online'&&net.role==='guest');$('rematchHint').hidden=!(mode==='online'&&net.role==='guest');$('againBtn').hidden=mode==='online'&&net.role==='guest';showPanel('none');if(window.matchMedia('(pointer:coarse), (max-width:700px)').matches)requestAnimationFrame(()=>window.scrollTo(0,0));try{ctxAudio=ctxAudio||new (window.AudioContext||window.webkitAudioContext)();ctxAudio.resume()}catch(e){}}
+function pauseGame(){if(mode==='online')return;if(phase==='playing'){phase='paused';keys.clear();clearTouch();showPanel('pause')}else if(phase==='paused'){phase='playing';showPanel('none')}}
+function menuGame(){leaveOnline();phase='menu';keys.clear();clearTouch();resetGame();showPanel('menu')}
 function loop(tm){const dt=Math.min(.035,Math.max(0,(tm-lastTime)/1000));lastTime=tm;
 if(game&&phase==='playing'&&!(mode==='online'&&net.role==='guest'))update(dt);
 if(mode==='online'&&phase==='playing'&&net.ws&&net.ws.readyState===1){
@@ -203,14 +297,14 @@ if(net.role==='guest'&&tm-net.lastInput>38){netSend({type:'input',u:myControls()
 }
 drawGame();requestAnimationFrame(loop)}
 
-function myControls(){return{f:keys.has('KeyW')||keys.has('ArrowUp'),b:keys.has('KeyS')||keys.has('ArrowDown'),l:keys.has('KeyA')||keys.has('ArrowLeft'),r:keys.has('KeyD')||keys.has('ArrowRight'),shoot:keys.has('KeyF')||keys.has('Space')||keys.has('Enter')||keys.has('NumpadEnter')}}
+function myControls(){return{f:pressed('KeyW')||pressed('ArrowUp'),b:pressed('KeyS')||pressed('ArrowDown'),l:pressed('KeyA')||pressed('ArrowLeft'),r:pressed('KeyD')||pressed('ArrowRight'),shoot:pressed('KeyF')||pressed('Space')||pressed('Enter')||pressed('NumpadEnter')}}
 function netSend(msg){if(net.ws&&net.ws.readyState===1)try{net.ws.send(JSON.stringify(msg))}catch(e){}}
 function sendWorld(){if(net.role==='host'&&game)netSend({type:'state',map:selectedMap,state:game})}
 function inviteUrl(){const url=new URL(window.location.href);url.searchParams.set('room',net.code);return url.toString()}
 function showNetError(message){$('onlineError').textContent=message;$('onlineError').hidden=false}
 function leaveOnline(){const ws=net.ws;net.ws=null;net.role=null;net.peer=false;net.code='';remoteInput={f:false,b:false,l:false,r:false,shoot:false};if(ws){try{if(ws.readyState===1)ws.send(JSON.stringify({type:'leave'}));ws.close()}catch(e){}}}
 function showOnlineLobby(){
- phase='lobby';keys.clear();
+ phase='lobby';keys.clear();clearTouch();
  $('roomCodeText').textContent=net.code||'------';
  $('lobbyHeading').innerHTML=net.peer?'REDO FÖR <span class="accent">STRID!</span>':'INVÄNTAR <span class="accent">MOTSTÅNDARE.</span>';
  $('lobbyDesc').textContent=net.role==='host'?'Skicka länken till din kompis. När båda är med kan du starta matchen.':'Du är ansluten. Vänta på att den andra spelaren startar matchen.';
@@ -244,7 +338,7 @@ function openOnline(action, code){
  ws.onopen=()=>{if(net.ws===ws)netSend(action==='create'?{type:'create'}:{type:'join',code});};
  ws.onmessage=e=>{if(net.ws!==ws)return;try{handleNetworkMessage(JSON.parse(e.data))}catch(err){console.warn('Ogiltigt servermeddelande',err)}};
  ws.onerror=()=>{};
- ws.onclose=()=>{if(net.ws!==ws)return;net.ws=null;net.role=null;net.peer=false;net.code='';remoteInput={f:false,b:false,l:false,r:false,shoot:false};keys.clear();phase='menu';resetGame();setMode('online');showPanel('menu');showNetError('Anslutningen bröts. Kontrollera att onlineservern är igång och försök igen.');};
+ ws.onclose=()=>{if(net.ws!==ws)return;net.ws=null;net.role=null;net.peer=false;net.code='';remoteInput={f:false,b:false,l:false,r:false,shoot:false};keys.clear();clearTouch();phase='menu';resetGame();setMode('online');showPanel('menu');showNetError('Anslutningen bröts. Kontrollera att onlineservern är igång och försök igen.');};
  setTimeout(()=>{if(net.ws===ws&&ws.readyState===0){ws.close();showNetError('Servern svarar inte.')}} ,90000);
  ws.addEventListener('open',()=>{ $('startBtn').disabled=false;$('joinBtn').disabled=false;});
  ws.addEventListener('close',()=>{ $('startBtn').disabled=false;$('joinBtn').disabled=false;});
@@ -264,8 +358,29 @@ document.querySelectorAll('.mapchoice').forEach(el=>el.addEventListener('click',
 ui.sound.addEventListener('click',()=>{muted=!muted;ui.sound.setAttribute('aria-pressed',String(!muted));ui.sound.setAttribute('aria-label',muted?'Slå på ljud':'Stäng av ljud');ui.soundLabel.textContent=muted?'LJUD AV':'LJUD PÅ'});
 const playKeys=new Set(['KeyW','KeyA','KeyS','KeyD','KeyF','Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Enter','NumpadEnter']);
 document.addEventListener('keydown',e=>{if(e.code==='KeyP'||e.code==='Escape'){if(phase==='playing'||phase==='paused'){e.preventDefault();if(!e.repeat)pauseGame()}return}if(e.code==='Enter'&&phase==='menu'&&e.target.tagName!=='BUTTON'&&e.target.tagName!=='INPUT'){e.preventDefault();if(mode==='online')createRoom();else startGame();return}if(phase==='playing'&&playKeys.has(e.code)){e.preventDefault();keys.add(e.code)}});
-document.addEventListener('keyup',e=>{keys.delete(e.code)});window.addEventListener('blur',()=>{keys.clear();if(phase==='playing'&&mode!=='online')pauseGame()});document.addEventListener('visibilitychange',()=>{if(document.hidden){keys.clear();if(phase==='playing'&&mode!=='online')pauseGame()}});
-for(const el of document.querySelectorAll('[data-control]')){const code=el.dataset.control;el.addEventListener('pointerdown',e=>{e.preventDefault();if(phase==='playing'){try{el.setPointerCapture(e.pointerId)}catch(err){}keys.add(code);el.classList.add('held')}});const up=e=>{keys.delete(code);el.classList.remove('held')};el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);el.addEventListener('lostpointercapture',up);}
+document.addEventListener('keyup',e=>{keys.delete(e.code)});window.addEventListener('blur',()=>{keys.clear();clearTouch();if(phase==='playing'&&mode!=='online')pauseGame()});document.addEventListener('visibilitychange',()=>{if(document.hidden){keys.clear();clearTouch();if(phase==='playing'&&mode!=='online')pauseGame()}});
+// Drag anywhere inside the disc; drag tracking continues outside the disc via pointer capture.
+for(const stick of document.querySelectorAll('[data-stick]')){
+ const player=Number(stick.dataset.stick),codes=player===1?['KeyW','KeyS','KeyA','KeyD']:['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'];
+ const knob=stick.querySelector('.stick-knob');let pointer=null;
+ function move(e){if(pointer!==e.pointerId)return;const r=stick.getBoundingClientRect(),radius=r.width*.38;
+  let x=(e.clientX-r.left-r.width/2)/radius,y=(e.clientY-r.top-r.height/2)/radius;
+  const length=Math.hypot(x,y);if(length>1){x/=length;y/=length;}
+  const dead=.24;touchHeld.delete(codes[0]);touchHeld.delete(codes[1]);touchHeld.delete(codes[2]);touchHeld.delete(codes[3]);
+  if(y<-dead)touchHeld.add(codes[0]);if(y>dead)touchHeld.add(codes[1]);if(x<-dead)touchHeld.add(codes[2]);if(x>dead)touchHeld.add(codes[3]);
+  knob.style.transform=`translate(calc(-50% + ${Math.round(x*radius)}px),calc(-50% + ${Math.round(y*radius)}px))`;
+ }
+ function end(e){if(pointer!==e.pointerId)return;pointer=null;codes.forEach(code=>touchHeld.delete(code));knob.style.transform='translate(-50%,-50%)';stick.classList.remove('active');}
+ stick.addEventListener('pointerdown',e=>{if(phase!=='playing'||pointer!==null)return;e.preventDefault();pointer=e.pointerId;try{stick.setPointerCapture(pointer)}catch(err){}stick.classList.add('active');move(e)});
+ stick.addEventListener('pointermove',e=>{if(pointer!==null){e.preventDefault();move(e)}});
+ for(const name of ['pointerup','pointercancel','lostpointercapture'])stick.addEventListener(name,end);
+}
+for(const el of document.querySelectorAll('[data-control]')){const code=el.dataset.control;let pointer=null;
+ el.addEventListener('pointerdown',e=>{if(phase!=='playing'||pointer!==null)return;e.preventDefault();pointer=e.pointerId;try{el.setPointerCapture(e.pointerId)}catch(err){}touchHeld.add(code);el.classList.add('held')});
+ const up=e=>{if(pointer!==e.pointerId)return;pointer=null;touchHeld.delete(code);el.classList.remove('held')};
+ el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);el.addEventListener('lostpointercapture',up);
+}
+
 resetGame();showPanel('menu');window.addEventListener('resize',resize);if(window.ResizeObserver)new ResizeObserver(resize).observe(cv);resize();requestAnimationFrame(loop);
 })();
 </script>
