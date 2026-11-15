@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#09111d">
 <meta name="description" content="Tankduell – spela pansarvagnsduell online med en kompis från valfri stad, eller kör lokalt och mot datorn.">
-<title>TANKDUELL ONLINE — Arena 1v1 · Direktstyrning V3</title>
+<title>TANKDUELL ONLINE — Expanderad arena V4</title>
 <style>
 :root{--bg:#080e18;--panel:#101b29;--panel2:#152233;--line:#2b3a4d;--text:#f0f6f5;--sub:#91a6ae;--green:#b5f078;--orange:#ff996f;--cyan:#62d8da;--shadow:0 24px 85px #0008;--r:18px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(ellipse 60% 40% at 50% -5%,#173e3e55,transparent 80%),radial-gradient(ellipse 45% 45% at 0 75%,#1c2d4350,transparent),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.006em;overflow-x:hidden}
@@ -106,16 +106,23 @@ body.match-active .field-wrap canvas{aspect-ratio:16/9!important;width:100%!impo
  body.match-active .touchpanel #touchP2 .joystick{left:125px;bottom:max(12px,env(safe-area-inset-bottom))}
  body.match-active .touchpanel #touchP2 .touchbtn.firebtn{right:115px}
 }
+/* V4: miniradar och tydlig varning utan att påverka mobilens bildförhållande. */
+@media(orientation:landscape) and (max-height:540px) and (pointer:coarse){
+  body.match-active .top{display:none}
+  body.match-active .game-shell{max-width:min(68vw,calc((100dvh - 78px)*16/9))}
+}
+.npc-status{display:block;font-size:9px;color:#c6aaff;letter-spacing:.08em;font-weight:900;margin-top:5px}
+@media(max-width:700px){.npc-status{font-size:8px}body.match-active .scorebar{padding-inline:8px}}
 </style>
 </head>
 <body>
 <main class="site">
   <header class="top">
     <div class="brand"><div class="logo" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M6 11h20l2 8-4 5H8l-4-5 2-8Z" fill="currentColor"/><rect x="12" y="5" width="8" height="10" rx="3" fill="currentColor"/><path d="M16 2v9" stroke="#14251b" stroke-width="3" stroke-linecap="round"/><circle cx="10" cy="23" r="2" fill="#14251b"/><circle cx="22" cy="23" r="2" fill="#14251b"/></svg></div><div>TANKDUELL<small>THE BATTLEFIELD AWAITS</small></div></div>
-    <div class="topright"><span><span class="online-dot"></span>SPELBART DIREKT</span><span>V 3.0 ONLINE</span></div>
+    <div class="topright"><span><span class="online-dot"></span>SPELBART DIREKT</span><span>V 4.0 · STOR VÄRLD</span></div>
   </header>
   <section class="hero">
-    <div><p class="eyebrow">⚔ &nbsp; TOP-DOWN TANK BATTLE</p><h1>EN ARENA. <span>TVÅ TANKS.</span></h1><p>Välj bana, sikta, skjut och vinn. Först till 5 poäng tar hem segern.</p></div>
+    <div><p class="eyebrow">⚔ &nbsp; TOP-DOWN TANK BATTLE</p><h1>STÖRRE KARTA. <span>MER KAOS.</span></h1><p>Utforska en stor värld, ta genvägen genom portalerna och se upp för fientliga NPC-pansarvagnar. Först till 5 poäng vinner.</p></div>
     <div class="hero-actions">
       <button class="iconbutton" id="soundBtn" type="button" aria-label="Stäng av ljud" aria-pressed="true" title="Slå av/på ljud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 5-5 4H2v6h4l5 4V5Z"/><path d="M15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/></svg><span id="soundLabel">LJUD PÅ</span></button>
       <button class="iconbutton" id="pauseBtn" type="button" aria-label="Pausa spelet" title="Pausa eller fortsätt"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="4" width="5" height="16" rx="1"/><rect x="14" y="4" width="5" height="16" rx="1"/></svg><span id="pauseLabel">PAUS</span></button>
@@ -124,17 +131,17 @@ body.match-active .field-wrap canvas{aspect-ratio:16/9!important;width:100%!impo
   <section class="game-shell" aria-label="Tankduell spelplan">
     <div class="scorebar" aria-live="off">
       <div class="player one"><div class="colorbar"></div><div><div class="player-name">SPELARE 01 <span id="p1Bot"></span></div><div class="player-sub">GRÖN PANSARVAGN</div><div class="heart-row" id="hp1" aria-label="Spelare 1 hälsa"></div></div><strong class="digits" id="score1">0</strong></div>
-      <div class="center-score"><div class="arena-tag" id="arenaName">ÖKENPOSTEN</div><div class="clock" id="clock">00:00</div><span class="target">FÖRST TILL 5</span></div>
+      <div class="center-score"><div class="arena-tag" id="arenaName">ÖKENPOSTEN</div><div class="clock" id="clock">00:00</div><span class="target">FÖRST TILL 5</span><span class="npc-status" id="npcStatus">NPC: VÄNTAR</span></div>
       <div class="player two"><strong class="digits" id="score2">0</strong><div><div class="player-name" id="p2Name">SPELARE 02</div><div class="player-sub">ORANGE PANSARVAGN</div><div class="heart-row" id="hp2" aria-label="Spelare 2 hälsa"></div></div><div class="colorbar"></div></div>
     </div>
     <div class="field-wrap" id="fieldWrap">
       <canvas id="game" width="1200" height="675" role="img" aria-label="Top-down-arena med två pansarvagnar och hinder"></canvas>
-      <div class="scanlines"></div><div class="field-label" aria-hidden="true">SEKTOR 01 <b>ARENA / LIVE FEED</b></div>
+      <div class="scanlines"></div><div class="field-label" aria-hidden="true">STOR VÄRLD <b>CYAN = GENOMGÅNGAR</b></div>
       <div class="overlay" id="overlay">
         <div class="overlay-card" id="menuScreen">
           <div class="pill">MULTIPLAYER ARENA</div>
           <h2>REDO FÖR <span class="accent">STRID?</span></h2>
-          <p class="overlay-desc">Två pansarvagnar. En vinnare. Bjud in en kompis från en annan stad, spela på samma dator eller möt AI.</p>
+          <p class="overlay-desc">Stora arenor, portaler genom ytterväggarna och fiendepansarvagnar som dyker upp oväntat. Bjud in en kompis, spela lokalt eller möt datorn.</p>
           <div class="options" role="group" aria-label="Välj spelläge">
             <button class="choice selected" id="modeVersus" type="button" aria-pressed="true"><b>⚔ &nbsp; 2 SPELARE</b><small>Samma dator</small></button>
             <button class="choice" id="modeBot" type="button" aria-pressed="false"><b>◎ &nbsp; MOT DATORN</b><small>Solo mot AI</small></button>
@@ -142,9 +149,9 @@ body.match-active .field-wrap canvas{aspect-ratio:16/9!important;width:100%!impo
           </div>
           <div class="field-title">VÄLJ STRIDSZON</div>
           <div class="maps" role="group" aria-label="Välj bana">
-            <button class="mapchoice selected" data-map="0" type="button" aria-pressed="true"><span class="map-art m1"></span><b>ÖKENPOSTEN</b><small>Öppet och snabbt</small></button>
-            <button class="mapchoice" data-map="1" type="button" aria-pressed="false"><span class="map-art m2"></span><b>JÄRNVERKET</b><small>Skydd och vinklar</small></button>
-            <button class="mapchoice" data-map="2" type="button" aria-pressed="false"><span class="map-art m3"></span><b>GRÄNSLANDET</b><small>Trånga passager</small></button>
+            <button class="mapchoice selected" data-map="0" type="button" aria-pressed="true"><span class="map-art m1"></span><b>ÖKENPOSTEN</b><small>Vidsträckt öken</small></button>
+            <button class="mapchoice" data-map="1" type="button" aria-pressed="false"><span class="map-art m2"></span><b>JÄRNVERKET</b><small>Industriell labyrint</small></button>
+            <button class="mapchoice" data-map="2" type="button" aria-pressed="false"><span class="map-art m3"></span><b>GRÄNSLANDET</b><small>Befäst gräns</small></button>
           </div>
           <div class="online-join" id="onlineJoin" hidden>
   <label for="roomInput">HAR DU FÅTT EN RUMSKOD?</label>
@@ -153,7 +160,7 @@ body.match-active .field-wrap canvas{aspect-ratio:16/9!important;width:100%!impo
 </div>
 <p class="net-error" id="onlineError" role="status" hidden></p>
 <button class="cta" id="startBtn" type="button">STARTA STRIDEN &nbsp; →</button>
-          <p class="shortcut">Tips: <kbd>P</kbd> pausar spelet &nbsp; • &nbsp; Först till 5 poäng vinner</p>
+          <p class="shortcut">Tips: Portalerna i ytterväggarna leder till motsatt sida &nbsp; • &nbsp; NPC-fiender ger inga poäng</p>
         </div>
         <div class="overlay-card" hidden id="onlineScreen">
   <div class="pill">ONLINE / PRIVAT RUM</div>
@@ -206,94 +213,308 @@ body.match-active .field-wrap canvas{aspect-ratio:16/9!important;width:100%!impo
     <div class="control-card"><div class="control-head"><div class="control-icon">01</div><div><div class="control-name">Spelare 1</div><div class="control-sub">Grön pansarvagn</div></div></div><div class="keygroup"><div><div class="keyrow"><span class="key">W</span><div><span class="key">A</span><span class="key">S</span><span class="key">D</span></div></div><div class="actionlabel">KÖR I VALFRI RIKTNING</div></div><div><span class="key fire">F / SPACE</span><div class="actionlabel">SKJUT</div></div></div></div>
     <div class="control-card orange"><div class="control-head"><div class="control-icon">02</div><div><div class="control-name">Spelare 2</div><div class="control-sub">Orange pansarvagn / AI</div></div></div><div class="keygroup"><div><div class="keyrow"><span class="key">↑</span><div><span class="key">←</span><span class="key">↓</span><span class="key">→</span></div></div><div class="actionlabel">KÖR I VALFRI RIKTNING</div></div><div><span class="key fire">ENTER</span><div class="actionlabel">SKJUT</div></div></div></div>
   </div>
-  <footer class="about"><div><h3>HUR SPELAR MAN?</h3><p>Kör direkt i den riktning du vill: W/A/S/D eller piltangenterna. På mobil drar du joysticken åt det håll du vill åka, inklusive diagonalt, och släpper för att stanna. Skjut med F, mellanslag eller Enter. Skotten kan studsa mot metall, trälådor går att förstöra och reparationer dyker upp på banan. Först till fem utslagna pansarvagnar vinner. Spelet fungerar utan inloggning.</p></div><div class="flag">BYGGT FÖR WEBBEN · HTML5</div></footer>
+  <footer class="about"><div><h3>HUR SPELAR MAN?</h3><p>Styr pansarvagnen direkt med joystick, WASD eller piltangenter. Den stora kartan följer dig medan du kör. Kör genom de cyanblå öppningarna mitt på ytterväggarna för att komma ut på motsatt sida! Lila NPC-pansarvagnar dyker upp med jämna mellanrum och kan angripa båda spelarna, men ger aldrig poäng. Följ motståndaren på minikartan. Först till fem poäng vinner.</p></div><div class="flag">BYGGT FÖR WEBBEN · HTML5</div></footer>
 </main>
 <script>
 // Om HTML-filen ligger på en annan webbserver än onlineservern, ange t.ex.:
 // window.TANKDUELL_WS_URL = 'wss://din-server.example/ws';
 (()=>{'use strict';
-const W=1200,H=675,EDGE=42,WIN_SCORE=5,MAX_HP=4,TAU=Math.PI*2;
+const W=2200,H=1240,VW=1200,VH=675,EDGE=42,WIN_SCORE=5,MAX_HP=4,TAU=Math.PI*2;
+const GATE_Y=125,GATE_X=155; // Centrerade öppningar i ytterväggarna.
 const cv=document.getElementById('game'),c=cv.getContext('2d',{alpha:false}),$=id=>document.getElementById(id);
 const ui={overlay:$('overlay'),menu:$('menuScreen'),pause:$('pauseScreen'),win:$('winScreen'),score1:$('score1'),score2:$('score2'),hp1:$('hp1'),hp2:$('hp2'),clock:$('clock'),arena:$('arenaName'),status:$('statusText'),p2Name:$('p2Name'),sound:$('soundBtn'),soundLabel:$('soundLabel'),pauseBtn:$('pauseBtn'),pauseLabel:$('pauseLabel')};
 let phase='menu',mode='versus',selectedMap=0,game=null,muted=false,ctxAudio=null,lastTime=0,drawFrame=0,keys=new Set(),shake=0;
+const camera={x:0,y:0,zoom:1,ready:false};
 const net={ws:null,code:'',role:null,peer:false,lastInput:0,lastState:0,notice:''};
 let remoteInput={f:false,b:false,l:false,r:false,shoot:false};
 const touchHeld=new Set();
 const pressed=code=>keys.has(code)||touchHeld.has(code);
 const clearTouch=()=>{touchHeld.clear();document.querySelectorAll('.joystick').forEach(el=>{el.classList.remove('active');const knob=el.querySelector('.stick-knob');if(knob)knob.style.transform='translate(-50%,-50%)'});document.querySelectorAll('.touchbtn.held').forEach(el=>el.classList.remove('held'));};
 const maps=[
-{title:'ÖKENPOSTEN',floor:'#1a302c',accent:'#395645',obstacles:[
-{x:568,y:130,w:64,h:164,t:'steel'},{x:568,y:381,w:64,h:164,t:'steel'},
-{x:333,y:240,w:105,h:52,t:'wood'},{x:762,y:383,w:105,h:52,t:'wood'},
-{x:762,y:240,w:105,h:52,t:'wood'},{x:333,y:383,w:105,h:52,t:'wood'},
-{x:198,y:125,w:80,h:53,t:'steel'},{x:922,y:497,w:80,h:53,t:'steel'}]},
-{title:'JÄRNVERKET',floor:'#233033',accent:'#46565a',obstacles:[
-{x:480,y:200,w:240,h:48,t:'steel'},{x:480,y:427,w:240,h:48,t:'steel'},
-{x:323,y:101,w:56,h:180,t:'steel'},{x:821,y:394,w:56,h:180,t:'steel'},
-{x:318,y:409,w:103,h:55,t:'wood'},{x:779,y:211,w:103,h:55,t:'wood'},
-{x:538,y:300,w:124,h:75,t:'wood'},
-{x:871,y:110,w:70,h:58,t:'wood'},{x:259,y:507,w:70,h:58,t:'wood'}]},
-{title:'GRÄNSLANDET',floor:'#28312a',accent:'#535f48',obstacles:[
-{x:348,y:72,w:55,h:206,t:'steel'},{x:797,y:397,w:55,h:206,t:'steel'},
-{x:797,y:72,w:55,h:206,t:'steel'},{x:348,y:397,w:55,h:206,t:'steel'},
-{x:540,y:265,w:120,h:48,t:'steel'},{x:540,y:364,w:120,h:48,t:'steel'},
-{x:233,y:310,w:92,h:58,t:'wood'},{x:875,y:310,w:92,h:58,t:'wood'},
-{x:565,y:102,w:70,h:64,t:'wood'},{x:565,y:509,w:70,h:64,t:'wood'}]}];
+  {title:'ÖKENPOSTEN',floor:'#1c302a',accent:'#506446',obstacles:[
+    {x:350,y:220,w:135,h:58,t:'wood'},{x:375,y:860,w:130,h:58,t:'wood'},
+    {x:655,y:135,w:82,h:245,t:'steel'},{x:655,y:845,w:82,h:245,t:'steel'},
+    {x:855,y:405,w:130,h:56,t:'wood'},{x:855,y:770,w:130,h:56,t:'wood'},
+    {x:1064,y:270,w:72,h:235,t:'steel'},{x:1064,y:735,w:72,h:235,t:'steel'},
+    {x:1195,y:520,w:116,h:55,t:'wood'},{x:890,y:665,w:116,h:55,t:'wood'},
+    {x:1450,y:150,w:78,h:250,t:'steel'},{x:1450,y:840,w:78,h:250,t:'steel'},
+    {x:1590,y:435,w:130,h:55,t:'wood'},{x:1580,y:755,w:130,h:55,t:'wood'},
+    {x:1820,y:245,w:116,h:57,t:'wood'},{x:1820,y:915,w:116,h:57,t:'wood'},
+    {x:340,y:490,w:74,h:74,t:'steel'},{x:1790,y:520,w:78,h:74,t:'steel'},
+    {x:520,y:555,w:100,h:52,t:'wood'},{x:1570,y:600,w:100,h:52,t:'wood'}]},
+  {title:'JÄRNVERKET',floor:'#253135',accent:'#55676c',obstacles:[
+    {x:300,y:260,w:225,h:53,t:'steel'},{x:300,y:875,w:225,h:53,t:'steel'},
+    {x:560,y:420,w:55,h:240,t:'steel'},{x:720,y:175,w:255,h:55,t:'steel'},
+    {x:720,y:1000,w:255,h:55,t:'steel'},
+    {x:935,y:420,w:56,h:235,t:'wood'},{x:1190,y:620,w:56,h:235,t:'wood'},
+    {x:1080,y:295,w:160,h:58,t:'steel'},{x:1020,y:890,w:160,h:58,t:'steel'},
+    {x:1360,y:205,w:60,h:260,t:'steel'},{x:1360,y:760,w:60,h:260,t:'steel'},
+    {x:1575,y:485,w:180,h:60,t:'steel'},{x:1575,y:695,w:180,h:60,t:'steel'},
+    {x:1845,y:250,w:65,h:165,t:'steel'},{x:1845,y:825,w:65,h:165,t:'steel'},
+    {x:440,y:710,w:126,h:54,t:'wood'},{x:745,y:530,w:126,h:54,t:'wood'},
+    {x:1495,y:925,w:124,h:54,t:'wood'},{x:1845,y:570,w:112,h:54,t:'wood'},
+    {x:1090,y:538,w:100,h:66,t:'wood'}]},
+  {title:'GRÄNSLANDET',floor:'#283429',accent:'#627053',obstacles:[
+    {x:445,y:160,w:60,h:290,t:'steel'},{x:445,y:780,w:60,h:290,t:'steel'},
+    {x:725,y:320,w:62,h:280,t:'steel'},{x:725,y:690,w:62,h:280,t:'steel'},
+    {x:975,y:85,w:58,h:260,t:'steel'},{x:1167,y:895,w:58,h:260,t:'steel'},
+    {x:1240,y:235,w:230,h:56,t:'steel'},{x:1240,y:945,w:230,h:56,t:'steel'},
+    {x:1570,y:140,w:60,h:320,t:'steel'},{x:1570,y:785,w:60,h:320,t:'steel'},
+    {x:1815,y:345,w:60,h:220,t:'steel'},{x:1815,y:675,w:60,h:220,t:'steel'},
+    {x:870,y:480,w:130,h:55,t:'wood'},{x:870,y:705,w:130,h:55,t:'wood'},
+    {x:1090,y:500,w:68,h:80,t:'wood'},{x:1090,y:655,w:68,h:80,t:'wood'},
+    {x:1495,y:585,w:110,h:65,t:'wood'},{x:590,y:610,w:100,h:54,t:'wood'},
+    {x:320,y:600,w:90,h:55,t:'wood'},{x:1845,y:585,w:90,h:55,t:'wood'}]}
+];
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));const rand=(a,b)=>a+Math.random()*(b-a);const dist2=(x,y,xx,yy)=>(x-xx)**2+(y-yy)**2;const normAngle=a=>Math.atan2(Math.sin(a),Math.cos(a));
 function seeded(n){let t=n>>>0;return()=>{t=(t*1664525+1013904223)>>>0;return t/4294967296;};}
-const decoration=(()=>{const r=seeded(9008);return Array.from({length:190},()=>({x:r()*W,y:r()*H,s:r()*2.4+.5,a:r()*.11+.03,t:r()}));})();
-function makeTank(id){const is1=id===1;return{id,x:is1?140:1060,y:is1?337:338,a:is1?0:Math.PI,color:is1?'#b5f078':'#ff996f',dark:is1?'#5e914d':'#ba5b45',hp:MAX_HP,alive:true,cool:0,inv:1,respawn:0,muzzle:0,track:0,botTime:0,botShift:1};}
-function resetGame(){game={tanks:[makeTank(1),makeTank(2)],scores:[0,0],bullets:[],particles:[],marks:[],obstacles:maps[selectedMap].obstacles.map(o=>({...o,hp:o.t==='wood'?3:999})),pickups:[],pickupTimer:10,time:0,flash:0,message:'STRIDEN BÖRJAR!',messageTimer:1.6,map:selectedMap};shake=0;syncUI();}
+const decoration=(()=>{const r=seeded(9008);return Array.from({length:620},()=>({x:r()*W,y:r()*H,s:r()*2.4+.5,a:r()*.11+.03,t:r()}));})();
+function makeTank(id){const is1=id===1;return{id,x:is1?205:W-205,y:H/2,a:is1?0:Math.PI,color:is1?'#b5f078':'#ff996f',dark:is1?'#5e914d':'#ba5b45',hp:MAX_HP,alive:true,cool:0,inv:1,respawn:0,muzzle:0,track:0,botTime:0,botShift:1,portalCd:0};}
+function resetGame(){game={tanks:[makeTank(1),makeTank(2)],scores:[0,0],bullets:[],particles:[],marks:[],obstacles:maps[selectedMap].obstacles.map(o=>({...o,hp:o.t==='wood'?3:999})),pickups:[],pickupTimer:11,npcs:[],npcSpawnTimer:15,npcSeq:100,time:0,flash:0,message:'STORA ARENAN ÖPPNAR!',messageTimer:1.7,map:selectedMap};shake=0;camera.ready=false;syncUI();}
 function makeSound(type){if(muted||phase!=='playing')return;try{ctxAudio=ctxAudio||new (window.AudioContext||window.webkitAudioContext)();if(ctxAudio.state==='suspended')ctxAudio.resume();const now=ctxAudio.currentTime,osc=ctxAudio.createOscillator(),g=ctxAudio.createGain();osc.connect(g);g.connect(ctxAudio.destination);let freq=120,vol=.065,duration=.14,kind='sawtooth';if(type==='shot'){freq=155;duration=.11;vol=.046}else if(type==='hit'){freq=70;duration=.13;vol=.065}else if(type==='bounce'){freq=520;duration=.07;vol=.023;kind='square'}else if(type==='boom'){freq=68;duration=.36;vol=.08}else if(type==='repair'){freq=550;duration=.25;vol=.045;kind='sine'}else if(type==='win'){freq=370;duration=.56;vol=.06;kind='triangle'}osc.type=kind;osc.frequency.setValueAtTime(freq,now);osc.frequency.exponentialRampToValueAtTime(Math.max(30,freq*.43),now+duration);g.gain.setValueAtTime(vol,now);g.gain.exponentialRampToValueAtTime(.001,now+duration);osc.start(now);osc.stop(now+duration+.01)}catch(e){}}
 function burst(x,y,color,n=14,power=145){if(!game)return;for(let i=0;i<n;i++){let a=rand(0,TAU),s=rand(power*.23,power);game.particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rand(.23,.65),max:.65,size:rand(2.2,6),color})}if(game.particles.length>350)game.particles.splice(0,game.particles.length-350);}
 function spark(x,y,color,n=6){burst(x,y,color,n,90)}
 function circleRect(x,y,r,o){const nx=clamp(x,o.x,o.x+o.w),ny=clamp(y,o.y,o.y+o.h);return dist2(x,y,nx,ny)<r*r;}
-function blocked(x,y,r,tank){if(x-r<EDGE||x+r>W-EDGE||y-r<EDGE||y+r>H-EDGE)return true;for(const o of game.obstacles){if(o.hp>0&&circleRect(x,y,r,o))return true;}for(const t of game.tanks){if(t!==tank&&t.alive&&dist2(x,y,t.x,t.y)<(r+23)**2)return true;}return false;}
-function reposition(t){const is1=t.id===1,other=game.tanks[is1?1:0],candidates=is1?[[140,337,0],[140,185,.25],[140,490,-.25],[245,337,0]]:[[1060,337,Math.PI],[1060,185,2.9],[1060,490,3.4],[955,337,Math.PI]];for(const [x,y,a] of candidates){if(!game.obstacles.some(o=>o.hp>0&&circleRect(x,y,27,o))&&(!other.alive||dist2(x,y,other.x,other.y)>160**2)){t.x=x;t.y=y;t.a=a;break;}}t.hp=MAX_HP;t.inv=1.15;t.alive=true;t.muzzle=0;t.cool=.3;burst(t.x,t.y,t.color,15,75);}
+function inSideGate(y,r=0){return Math.abs(y-H/2)<GATE_Y-r;}
+function inTopGate(x,r=0){return Math.abs(x-W/2)<GATE_X-r;}
+function blocked(x,y,r,tank){
+ const gateReady=!tank||tank.portalCd<=0;
+ if(x-r<EDGE&&!(gateReady&&inSideGate(y,r)))return true;
+ if(x+r>W-EDGE&&!(gateReady&&inSideGate(y,r)))return true;
+ if(y-r<EDGE&&!(gateReady&&inTopGate(x,r)))return true;
+ if(y+r>H-EDGE&&!(gateReady&&inTopGate(x,r)))return true;
+ for(const o of game.obstacles){if(o.hp>0&&circleRect(x,y,r,o))return true;}
+ for(const t of [...game.tanks,...game.npcs]){if(t!==tank&&t.alive&&dist2(x,y,t.x,t.y)<(r+23)**2)return true;}
+ return false;
+}
+function tryPortal(t){
+ if(t.portalCd>0)return;
+ let x=t.x,y=t.y,used=false;
+ if(x<EDGE&&inSideGate(y,25)){x=W-EDGE-37;used=true;}
+ else if(x>W-EDGE&&inSideGate(y,25)){x=EDGE+37;used=true;}
+ else if(y<EDGE&&inTopGate(x,25)){y=H-EDGE-37;used=true;}
+ else if(y>H-EDGE&&inTopGate(x,25)){y=EDGE+37;used=true;}
+ if(!used)return;
+ // Teleportera aldrig in ovanpå en vägg eller en annan pansarvagn.
+ if(blocked(x,y,23,t))return;
+ burst(t.x,t.y,'#70efff',22,130);
+ t.x=x;t.y=y;t.portalCd=.62;
+ burst(x,y,'#70efff',22,125);
+ if(t.id<=2){game.message='GENOMGÅNG AKTIVERAD';game.messageTimer=.7;}
+}
+function reposition(t){
+ const is1=t.id===1;
+ const candidates=is1?[[205,H/2,0],[205,330,0],[205,920,0],[370,H/2,0]]:[[W-205,H/2,Math.PI],[W-205,330,Math.PI],[W-205,920,Math.PI],[W-370,H/2,Math.PI]];
+ for(const [x,y,a] of candidates){if(!blocked(x,y,27,t)){t.x=x;t.y=y;t.a=a;break;}}
+ t.hp=MAX_HP;t.inv=1.15;t.alive=true;t.portalCd=0;t.muzzle=0;t.cool=.3;
+ burst(t.x,t.y,t.color,15,75);
+}
 function controls(t){if(t.id===1)return {f:pressed('KeyW'),b:pressed('KeyS'),l:pressed('KeyA'),r:pressed('KeyD'),shoot:pressed('KeyF')||pressed('Space')};if(mode==='bot')return botControls(t);if(mode==='online')return remoteInput;return{f:pressed('ArrowUp'),b:pressed('ArrowDown'),l:pressed('ArrowLeft'),r:pressed('ArrowRight'),shoot:pressed('Enter')||pressed('NumpadEnter')}}
-function canSee(a,b){for(let i=1;i<=12;i++){let x=a.x+(b.x-a.x)*i/12,y=a.y+(b.y-a.y)*i/12;for(const o of game.obstacles){if(o.hp>0&&x>o.x-5&&x<o.x+o.w+5&&y>o.y-5&&y<o.y+o.h+5)return false}}return true;}
-function botControls(t){const target=game.tanks[0];if(!target.alive)return{f:false,b:false,l:false,r:false,shoot:false};t.botTime-=1/60;if(t.botTime<=0){t.botTime=rand(.6,1.5);t.botShift=Math.random()>.5?1:-1;}let angle=Math.atan2(target.y-t.y,target.x-t.x),diff=normAngle(angle-t.a),d=Math.hypot(target.x-t.x,target.y-t.y),see=canSee(t,target),aheadX=t.x+Math.cos(t.a)*73,aheadY=t.y+Math.sin(t.a)*73;let obstacle=game.obstacles.some(o=>o.hp>0&&circleRect(aheadX,aheadY,27,o));let turn=obstacle?t.botShift:Math.sign(diff);if(Math.abs(diff)<.07&&!obstacle)turn=0;return{f:d>185||!see,b:d<115,l:turn<0,r:turn>0,shoot:see&&Math.abs(diff)<.19&&d<780};}
+function canSee(a,b){
+ // Exakt linje mot rektanglar – viktigt på de större banorna.
+ const dx=b.x-a.x,dy=b.y-a.y;
+ for(const o of game.obstacles){
+   if(o.hp<=0)continue;
+   const left=o.x-6,right=o.x+o.w+6,top=o.y-6,bottom=o.y+o.h+6;
+   let lo=0,hi=1,hit=true;
+   for(const [pos,delta,min,max] of [[a.x,dx,left,right],[a.y,dy,top,bottom]]){
+     if(Math.abs(delta)<.00001){if(pos<min||pos>max){hit=false;break;}continue;}
+     let t0=(min-pos)/delta,t1=(max-pos)/delta;
+     if(t0>t1)[t0,t1]=[t1,t0];
+     lo=Math.max(lo,t0);hi=Math.min(hi,t1);
+     if(lo>hi){hit=false;break;}
+   }
+   if(hit)return false;
+ }
+ return true;
+}
+function botControls(t){
+ const target=game.tanks[0];if(!target.alive)return{f:false,b:false,l:false,r:false,shoot:false};
+ t.botTime-=1/60;if(t.botTime<=0){t.botTime=rand(.6,1.3);t.botShift=Math.random()>.5?1:-1;}
+ const dx=target.x-t.x,dy=target.y-t.y,d=Math.hypot(dx,dy),see=canSee(t,target);
+ const nextX=t.x+Math.sign(dx)*75,nextY=t.y+Math.sign(dy)*75;
+ let vx=dx,vy=dy;
+ if(game.obstacles.some(o=>o.hp>0&&circleRect(nextX,nextY,26,o))){
+   vx=dy*t.botShift;vy=-dx*t.botShift;
+ }
+ return{f:vy< -35&&d>135,b:vy>35&&d>135,l:vx< -35&&d>135,r:vx>35&&d>135,shoot:see&&d<760};
+}
+function spawnNpc(){
+ if(game.npcs.length>=2)return;
+ for(let attempt=0;attempt<85;attempt++){
+   const x=rand(150,W-150),y=rand(145,H-145);
+   if(game.tanks.some(t=>t.alive&&dist2(x,y,t.x,t.y)<380**2))continue;
+   if(blocked(x,y,31,null))continue;
+   const id=game.npcSeq++;
+   game.npcs.push({id,npc:true,x,y,a:rand(-Math.PI,Math.PI),color:'#b9a2ff',dark:'#665692',hp:2,maxHp:2,alive:true,inv:.6,cool:rand(.5,1.3),muzzle:0,track:0,portalCd:0,life:50,stride:Math.random()>.5?1:-1,think:0});
+   burst(x,y,'#b9a2ff',20,120);
+   game.message='⚠ FIENDEN ÄR HÄR!';game.messageTimer=1.6;
+   return;
+ }
+}
+function defeatNpc(t){
+ t.alive=false;burst(t.x,t.y,'#b9a2ff',27,190);burst(t.x,t.y,'#fff3bf',11,110);
+ if(Math.random()<.35&&game.pickups.length<3)game.pickups.push({x:t.x,y:t.y,type:'repair',spin:0,life:13});
+ makeSound('boom');
+}
+function updateNpc(t,dt){
+ t.inv=Math.max(0,t.inv-dt);t.muzzle=Math.max(0,t.muzzle-dt);t.cool=Math.max(0,t.cool-dt);
+ t.portalCd=Math.max(0,t.portalCd-dt);t.life-=dt;
+ if(t.life<=0){t.alive=false;burst(t.x,t.y,'#b9a2ff',12,80);return;}
+ const targets=game.tanks.filter(p=>p.alive);
+ if(!targets.length)return;
+ targets.sort((a,b)=>dist2(a.x,a.y,t.x,t.y)-dist2(b.x,b.y,t.x,t.y));
+ const target=targets[0],dx=target.x-t.x,dy=target.y-t.y,d=Math.hypot(dx,dy),see=canSee(t,target);
+ t.a=Math.atan2(dy,dx);
+ if(d>165){
+   const speed=115,ux=dx/Math.max(d,1),uy=dy/Math.max(d,1);
+   t.think-=dt;if(t.think<=0){t.think=rand(.65,1.4);t.stride*=-1;}
+   // Prova genvägar runt hinder utan att gå igenom dem.
+   let moved=false;
+   for(const offset of [0,t.stride*Math.PI/3,-t.stride*Math.PI/3,t.stride*Math.PI/2,-t.stride*Math.PI/2,Math.PI]){
+     const a=Math.atan2(uy,ux)+offset,mx=Math.cos(a)*speed*dt,my=Math.sin(a)*speed*dt;
+     if(!blocked(t.x+mx*3,t.y+my*3,23,t)){
+       t.x+=mx;t.y+=my;t.track-=dt;
+       if(t.track<=0){addMark(t);t.track=.11;}
+       moved=true;break;
+     }
+   }
+   if(moved)tryPortal(t);
+ }
+ if(see&&d<690&&t.cool<=0)fire(t);
+}
 function addMark(t){const a=t.a+Math.PI/2;for(const side of [-1,1]){game.marks.push({x:t.x+Math.cos(a)*side*20,y:t.y+Math.sin(a)*side*20,a:t.a,life:4.5})}if(game.marks.length>180)game.marks.splice(0,game.marks.length-180);}
-function fire(t){if(!t.alive||t.cool>0)return;t.cool=.48;t.muzzle=.11;const ax=Math.cos(t.a),ay=Math.sin(t.a);let x=t.x+ax*37,y=t.y+ay*37;game.bullets.push({x,y,px:x,py:y,vx:ax*650,vy:ay*650,owner:t.id,life:1.45,age:0,bounce:1,r:5});for(let k=0;k<6;k++)game.particles.push({x,y,vx:ax*rand(55,165)+rand(-70,70),vy:ay*rand(55,165)+rand(-70,70),life:rand(.07,.2),max:.2,size:rand(2,6),color:'#fff5ab'});shake=Math.min(11,shake+1.8);makeSound('shot');}
-function kill(victim,killer){victim.alive=false;victim.respawn=1.7;game.scores[killer.id-1]++;game.message=(killer.id===1?'GRÖN':'ORANGE')+' TAR POÄNG!';game.messageTimer=1.35;shake=19;burst(victim.x,victim.y,victim.color,32,210);burst(victim.x,victim.y,'#ffdc81',21,195);makeSound('boom');if(game.scores[killer.id-1]>=WIN_SCORE){makeSound('win');phase='win';game.messageTimer=0;showWin(killer);if(mode==='online'&&net.role==='host'){sendWorld();netSend({type:'complete',winner:killer.id})}}syncUI();}
-function hitTank(t,owner,x,y){if(t.inv>0||!t.alive)return;t.hp--;t.inv=.22;spark(x,y,'#fef7cf',14);burst(x,y,t.color,8,90);shake=Math.min(18,shake+5);makeSound('hit');if(t.hp<=0){const credited=owner===t.id?3-owner:owner;kill(t,game.tanks[credited-1]);}else syncUI();}
+function fire(t){if(!t.alive||t.cool>0)return;t.cool=t.npc?1.25:.48;t.muzzle=.11;const ax=Math.cos(t.a),ay=Math.sin(t.a);let x=t.x+ax*37,y=t.y+ay*37;const speed=t.npc?510:650;game.bullets.push({x,y,px:x,py:y,vx:ax*speed,vy:ay*speed,owner:t.id,life:t.npc?2:2.3,age:0,bounce:1,r:5});for(let k=0;k<6;k++)game.particles.push({x,y,vx:ax*rand(55,165)+rand(-70,70),vy:ay*rand(55,165)+rand(-70,70),life:rand(.07,.2),max:.2,size:rand(2,6),color:'#fff5ab'});shake=Math.min(11,shake+1.8);makeSound('shot');}
+function kill(victim,killer){
+ victim.alive=false;victim.respawn=1.7;
+ if(killer){game.scores[killer.id-1]++;game.message=(killer.id===1?'GRÖN':'ORANGE')+' TAR POÄNG!';}
+ else game.message='EN NPC SLOG UT EN SPELARE!';
+ game.messageTimer=1.35;shake=19;
+ burst(victim.x,victim.y,victim.color,32,210);burst(victim.x,victim.y,'#ffdc81',21,195);makeSound('boom');
+ if(killer&&game.scores[killer.id-1]>=WIN_SCORE){makeSound('win');phase='win';game.messageTimer=0;showWin(killer);if(mode==='online'&&net.role==='host'){sendWorld();netSend({type:'complete',winner:killer.id})}}
+ syncUI();
+}
+function hitTank(t,owner,x,y){
+ if(t.inv>0||!t.alive)return;
+ t.hp--;t.inv=.22;spark(x,y,'#fef7cf',14);burst(x,y,t.color,8,90);shake=Math.min(18,shake+5);makeSound('hit');
+ if(t.hp<=0){
+   if(t.npc){defeatNpc(t);return;}
+   const killer=owner>2?null:game.tanks[(owner===t.id?3-owner:owner)-1];
+   kill(t,killer);
+ }else syncUI();
+}
 function collideBullet(b){for(const o of game.obstacles){if(o.hp<=0||!circleRect(b.x,b.y,b.r,o))continue;if(o.t==='wood'){o.hp--;spark(b.x,b.y,'#cba16b',12);if(o.hp===0){burst(o.x+o.w/2,o.y+o.h/2,'#aa8659',25,140);shake=Math.min(13,shake+3)}makeSound('hit');return true;}if(b.bounce>0){const fromLeft=Math.abs(b.px-o.x),fromRight=Math.abs(b.px-(o.x+o.w)),fromTop=Math.abs(b.py-o.y),fromBottom=Math.abs(b.py-(o.y+o.h));const h=Math.min(fromLeft,fromRight),v=Math.min(fromTop,fromBottom);if(h<v){b.vx=-b.vx;b.x=b.px}else{b.vy=-b.vy;b.y=b.py}b.bounce--;spark(b.x,b.y,'#aeeeff',9);makeSound('bounce');return false;}spark(b.x,b.y,'#90ccd1',7);return true;}return false;}
-function spawnPickup(){if(game.pickups.length>1)return;for(let i=0;i<30;i++){let x=rand(210,990),y=rand(115,560);if(!blocked(x,y,28,null)){game.pickups.push({x,y,type:'repair',spin:0,life:15});return;}}}
-function update(dt){game.time+=dt;game.flash=Math.max(0,game.flash-dt);game.messageTimer=Math.max(0,game.messageTimer-dt);shake=Math.max(0,shake-dt*26);game.pickupTimer-=dt;if(game.pickupTimer<=0){spawnPickup();game.pickupTimer=rand(13,18)}
- for(const t of game.tanks){t.cool=Math.max(0,t.cool-dt);t.inv=Math.max(0,t.inv-dt);t.muzzle=Math.max(0,t.muzzle-dt);if(!t.alive){if(phase==='playing'){t.respawn-=dt;if(t.respawn<=0)reposition(t)}continue;}const co=controls(t);
-  if(mode==='bot'&&t.id===2){
-   // Behåll AI:ns befintliga logik (gasa, backa och sväng).
-   const rot=(Number(co.r)-Number(co.l))*2.85*dt;t.a+=rot;
-   const drive=Number(co.f)-Number(co.b);
-   if(drive){const speed=drive>0?182:125,dx=Math.cos(t.a)*speed*dt*drive,dy=Math.sin(t.a)*speed*dt*drive;
-    if(!blocked(t.x+dx,t.y,23,t))t.x+=dx;
-    if(!blocked(t.x,t.y+dy,23,t))t.y+=dy;
-    t.track-=dt;if(t.track<=0){addMark(t);t.track=.07;}}
-  }else{
-   // Direktstyrning för båda mänskliga spelarna (även online):
-   // Höger = åk åt höger, upp = åk uppåt; diagonaler normaliseras.
-   const dx=Number(co.r)-Number(co.l),dy=Number(co.b)-Number(co.f);
-   const len=Math.hypot(dx,dy);
-   if(len>0){const ux=dx/len,uy=dy/len,speed=190;
-    t.a=Math.atan2(uy,ux); // Pansarvagnens front och kanon pekar dit den åker.
+function spawnPickup(){
+ if(game.pickups.length>2)return;
+ for(let i=0;i<50;i++){
+  const x=rand(150,W-150),y=rand(135,H-135);
+  if(!blocked(x,y,28,null)){game.pickups.push({x,y,type:'repair',spin:0,life:19});return;}
+ }
+}
+function update(dt){
+ game.time+=dt;game.flash=Math.max(0,game.flash-dt);
+ game.messageTimer=Math.max(0,game.messageTimer-dt);shake=Math.max(0,shake-dt*26);
+ game.pickupTimer-=dt;if(game.pickupTimer<=0){spawnPickup();game.pickupTimer=rand(12,18);}
+ game.npcSpawnTimer-=dt;if(game.npcSpawnTimer<=0){spawnNpc();game.npcSpawnTimer=rand(19,28);}
+ for(const t of game.tanks){
+  t.cool=Math.max(0,t.cool-dt);t.inv=Math.max(0,t.inv-dt);t.muzzle=Math.max(0,t.muzzle-dt);t.portalCd=Math.max(0,t.portalCd-dt);
+  if(!t.alive){if(phase==='playing'){t.respawn-=dt;if(t.respawn<=0)reposition(t);}continue;}
+  const co=controls(t);
+  const dx=Number(co.r)-Number(co.l),dy=Number(co.b)-Number(co.f),len=Math.hypot(dx,dy);
+  if(len>0){
+    const ux=dx/len,uy=dy/len,speed=205;
+    t.a=Math.atan2(uy,ux);
     const mx=ux*speed*dt,my=uy*speed*dt;
     if(!blocked(t.x+mx,t.y,23,t))t.x+=mx;
     if(!blocked(t.x,t.y+my,23,t))t.y+=my;
-    t.track-=dt;if(t.track<=0){addMark(t);t.track=.07;}
-   }
+    tryPortal(t);
+    t.track-=dt;if(t.track<=0){addMark(t);t.track=.075;}
   }
-  if(co.shoot)fire(t);}
- for(let i=game.bullets.length-1;i>=0;i--){const b=game.bullets[i];b.px=b.x;b.py=b.y;b.x+=b.vx*dt;b.y+=b.vy*dt;b.age+=dt;b.life-=dt;let gone=b.life<=0;if(!gone&&(b.x<EDGE||b.x>W-EDGE||b.y<EDGE||b.y>H-EDGE)){if(b.bounce){if(b.x<EDGE||b.x>W-EDGE){b.vx*=-1;b.x=clamp(b.x,EDGE+5,W-EDGE-5)}if(b.y<EDGE||b.y>H-EDGE){b.vy*=-1;b.y=clamp(b.y,EDGE+5,H-EDGE-5)}b.bounce--;spark(b.x,b.y,'#aeeeff',6);makeSound('bounce')}else gone=true;}if(!gone)gone=collideBullet(b);if(!gone){for(const t of game.tanks){if(!t.alive||(t.id===b.owner&&b.age<.22))continue;if(dist2(b.x,b.y,t.x,t.y)<28**2){hitTank(t,b.owner,b.x,b.y);gone=true;break;}}}if(gone)game.bullets.splice(i,1);}
- for(let i=game.pickups.length-1;i>=0;i--){const p=game.pickups[i];p.spin+=dt;p.life-=dt;if(p.life<=0){game.pickups.splice(i,1);continue;}for(const t of game.tanks){if(t.alive&&t.hp<MAX_HP&&dist2(t.x,t.y,p.x,p.y)<38**2){t.hp=Math.min(MAX_HP,t.hp+2);burst(p.x,p.y,'#89ffe3',23,130);game.pickups.splice(i,1);makeSound('repair');syncUI();break;}}}
- for(let i=game.particles.length-1;i>=0;i--){const p=game.particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=Math.max(0,1-dt*2.8);p.vy*=Math.max(0,1-dt*2.8);p.life-=dt;if(p.life<=0)game.particles.splice(i,1)}for(let i=game.marks.length-1;i>=0;i--){game.marks[i].life-=dt;if(game.marks[i].life<=0)game.marks.splice(i,1)}
- if(drawFrame++%10===0)syncUI();}
+  if(co.shoot)fire(t);
+ }
+ for(const t of game.npcs)if(t.alive)updateNpc(t,dt);
+ game.npcs=game.npcs.filter(t=>t.alive);
+ for(let i=game.bullets.length-1;i>=0;i--){
+   const b=game.bullets[i];b.px=b.x;b.py=b.y;b.x+=b.vx*dt;b.y+=b.vy*dt;b.age+=dt;b.life-=dt;
+   let gone=b.life<=0;
+   if(!gone&&(b.x<EDGE||b.x>W-EDGE||b.y<EDGE||b.y>H-EDGE)){
+     if(b.x<EDGE&&inSideGate(b.y,7))b.x=W-EDGE-10;
+     else if(b.x>W-EDGE&&inSideGate(b.y,7))b.x=EDGE+10;
+     else if(b.y<EDGE&&inTopGate(b.x,7))b.y=H-EDGE-10;
+     else if(b.y>H-EDGE&&inTopGate(b.x,7))b.y=EDGE+10;
+     else if(b.bounce){
+       if(b.x<EDGE||b.x>W-EDGE){b.vx*=-1;b.x=clamp(b.x,EDGE+5,W-EDGE-5);}
+       if(b.y<EDGE||b.y>H-EDGE){b.vy*=-1;b.y=clamp(b.y,EDGE+5,H-EDGE-5);}
+       b.bounce--;spark(b.x,b.y,'#aeeeff',6);makeSound('bounce');
+     }else gone=true;
+   }
+   if(!gone)gone=collideBullet(b);
+   if(!gone){
+     for(const t of [...game.tanks,...game.npcs]){
+       if(!t.alive)continue;
+       if(b.owner>=100&&t.npc)continue;
+       if(t.id===b.owner&&b.age<.22)continue;
+       if(dist2(b.x,b.y,t.x,t.y)<28**2){hitTank(t,b.owner,b.x,b.y);gone=true;break;}
+     }
+   }
+   if(gone)game.bullets.splice(i,1);
+ }
+ for(let i=game.pickups.length-1;i>=0;i--){
+   const p=game.pickups[i];p.spin+=dt;p.life-=dt;
+   if(p.life<=0){game.pickups.splice(i,1);continue;}
+   for(const t of game.tanks){
+     if(t.alive&&t.hp<MAX_HP&&dist2(t.x,t.y,p.x,p.y)<38**2){
+       t.hp=Math.min(MAX_HP,t.hp+2);burst(p.x,p.y,'#89ffe3',23,130);
+       game.pickups.splice(i,1);makeSound('repair');syncUI();break;
+     }
+   }
+ }
+ for(let i=game.particles.length-1;i>=0;i--){
+   const p=game.particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;
+   p.vx*=Math.max(0,1-dt*2.8);p.vy*=Math.max(0,1-dt*2.8);p.life-=dt;
+   if(p.life<=0)game.particles.splice(i,1);
+ }
+ for(let i=game.marks.length-1;i>=0;i--){
+   game.marks[i].life-=dt;if(game.marks[i].life<=0)game.marks.splice(i,1);
+ }
+ if(drawFrame++%10===0)syncUI();
+}
 function rounded(x,y,w,h,r){const rr=Math.min(r,w/2,h/2);c.beginPath();c.moveTo(x+rr,y);c.arcTo(x+w,y,x+w,y+h,rr);c.arcTo(x+w,y+h,x,y+h,rr);c.arcTo(x,y+h,x,y,rr);c.arcTo(x,y,x+w,y,rr);c.closePath()}
 function fillRect(x,y,w,h,color){c.fillStyle=color;c.fillRect(x,y,w,h)}
-function drawBackdrop(){const map=maps[selectedMap],floor=map.floor;fillRect(0,0,W,H,floor);let gr=c.createRadialGradient(W/2,H/2,20,W/2,H/2,700);gr.addColorStop(0,'#ffffff09');gr.addColorStop(1,'#0000004f');c.fillStyle=gr;c.fillRect(0,0,W,H);c.strokeStyle='#d2f5bc0b';c.lineWidth=1;for(let x=EDGE;x<W;x+=44){c.beginPath();c.moveTo(x,EDGE);c.lineTo(x,H-EDGE);c.stroke()}for(let y=EDGE;y<H;y+=44){c.beginPath();c.moveTo(EDGE,y);c.lineTo(W-EDGE,y);c.stroke()}for(const d of decoration){fillRect(d.x,d.y,d.s,d.s,d.t>.7?'#b0c49c18':'#101e2217')}
- c.strokeStyle='#e3f6c412';c.lineWidth=2;c.strokeRect(EDGE,EDGE,W-EDGE*2,H-EDGE*2);c.setLineDash([6,10]);c.strokeStyle='#d9e7b520';c.strokeRect(EDGE+9,EDGE+9,W-2*(EDGE+9),H-2*(EDGE+9));c.setLineDash([]);
- for(let x=EDGE+15;x<W-EDGE-15;x+=56){fillRect(x,EDGE-7,29,3,'#a1b69f28');fillRect(x,H-EDGE+4,29,3,'#a1b69f28')}for(let y=EDGE+12;y<H-EDGE;y+=56){fillRect(EDGE-7,y,3,29,'#a1b69f28');fillRect(W-EDGE+4,y,3,29,'#a1b69f28')}
- c.save();c.globalAlpha=.12;c.fillStyle=map.accent;for(let n=0;n<7;n++){let x=160+n*145,y=n%2?530:130;c.beginPath();c.ellipse(x,y,randSeed(n)*55+35,randSeed(n+7)*22+16,n*.8,0,TAU);c.fill()}c.restore();
- c.font='900 14px monospace';c.textAlign='center';c.fillStyle='#c2ddb021';c.fillText('A',155,95);c.fillText('B',1045,95);c.fillText('C',155,588);c.fillText('D',1045,588);
+function drawBackdrop(){
+ const map=maps[selectedMap],floor=map.floor;
+ fillRect(0,0,W,H,floor);
+ const gr=c.createRadialGradient(W/2,H/2,70,W/2,H/2,1450);gr.addColorStop(0,'#ffffff09');gr.addColorStop(1,'#00000048');c.fillStyle=gr;c.fillRect(0,0,W,H);
+ c.strokeStyle='#d2f5bc0c';c.lineWidth=1;
+ for(let x=EDGE;x<W;x+=44){c.beginPath();c.moveTo(x,EDGE);c.lineTo(x,H-EDGE);c.stroke();}
+ for(let y=EDGE;y<H;y+=44){c.beginPath();c.moveTo(EDGE,y);c.lineTo(W-EDGE,y);c.stroke();}
+ for(const d of decoration)fillRect(d.x,d.y,d.s,d.s,d.t>.7?'#b0c49c18':'#101e2217');
+ c.save();c.globalAlpha=.14;c.fillStyle=map.accent;
+ for(let n=0;n<16;n++){const x=130+(n%8)*276,y=(n<8?260:910)+((n%3)-1)*80;
+   c.beginPath();c.ellipse(x,y,randSeed(n)*85+50,randSeed(n+7)*50+25,n*.8,0,TAU);c.fill();}
+ c.restore();
+ // Ytterväggar med tydliga genomgångar i mitten på alla fyra sidor.
+ c.strokeStyle='#6b847d';c.lineWidth=10;c.lineCap='butt';c.beginPath();
+ c.moveTo(EDGE,EDGE);c.lineTo(W/2-GATE_X,EDGE);
+ c.moveTo(W/2+GATE_X,EDGE);c.lineTo(W-EDGE,EDGE);
+ c.moveTo(EDGE,H-EDGE);c.lineTo(W/2-GATE_X,H-EDGE);
+ c.moveTo(W/2+GATE_X,H-EDGE);c.lineTo(W-EDGE,H-EDGE);
+ c.moveTo(EDGE,EDGE);c.lineTo(EDGE,H/2-GATE_Y);
+ c.moveTo(EDGE,H/2+GATE_Y);c.lineTo(EDGE,H-EDGE);
+ c.moveTo(W-EDGE,EDGE);c.lineTo(W-EDGE,H/2-GATE_Y);
+ c.moveTo(W-EDGE,H/2+GATE_Y);c.lineTo(W-EDGE,H-EDGE);c.stroke();
+ c.strokeStyle='#1c2830';c.lineWidth=3;c.strokeRect(EDGE+8,EDGE+8,W-2*(EDGE+8),H-2*(EDGE+8));
+ const glow=.60+.25*Math.sin((game?.time||0)*3);
+ c.save();c.shadowBlur=24;c.shadowColor='#4ee9ff';c.globalAlpha=glow;
+ c.strokeStyle='#5ceaff';c.lineWidth=9;c.beginPath();
+ c.moveTo(W/2-GATE_X,EDGE);c.lineTo(W/2+GATE_X,EDGE);
+ c.moveTo(W/2-GATE_X,H-EDGE);c.lineTo(W/2+GATE_X,H-EDGE);
+ c.moveTo(EDGE,H/2-GATE_Y);c.lineTo(EDGE,H/2+GATE_Y);
+ c.moveTo(W-EDGE,H/2-GATE_Y);c.lineTo(W-EDGE,H/2+GATE_Y);c.stroke();c.restore();
+ c.fillStyle='#88f7ff';c.textAlign='center';c.font='900 18px ui-sans-serif, sans-serif';
+ c.fillText('↕ PORTAL ↕',W/2,EDGE+48);c.fillText('↕ PORTAL ↕',W/2,H-EDGE-32);
+ c.save();c.translate(EDGE+40,H/2);c.rotate(-Math.PI/2);c.fillText('↔ PORTAL ↔',0,0);c.restore();
+ c.save();c.translate(W-EDGE-40,H/2);c.rotate(Math.PI/2);c.fillText('↔ PORTAL ↔',0,0);c.restore();
 }
 function randSeed(n){return ((n*773+71)%997)/997}
 function drawObstacle(o){if(o.hp<=0)return;c.save();c.shadowColor='#0009';c.shadowBlur=14;c.shadowOffsetY=8;rounded(o.x,o.y,o.w,o.h,6);c.fillStyle=o.t==='steel'?'#627b80':'#856c4b';c.fill();c.restore();if(o.t==='steel'){rounded(o.x+3,o.y+3,o.w-6,o.h-7,4);c.fillStyle='#465c60';c.fill();c.strokeStyle='#8da6a6';c.lineWidth=2;c.stroke();fillRect(o.x+8,o.y+8,o.w-16,5,'#89a7aa70');fillRect(o.x+9,o.y+o.h-14,o.w-18,5,'#132f3799');c.fillStyle='#b7cccc';for(const x of [o.x+11,o.x+o.w-12])for(const y of [o.y+12,o.y+o.h-12]){c.beginPath();c.arc(x,y,2,0,TAU);c.fill()}if(o.w>100){for(let x=o.x+35;x<o.x+o.w-20;x+=45){fillRect(x,o.y+10,2,o.h-20,'#a1bcbc44')}}else if(o.h>100){for(let y=o.y+35;y<o.y+o.h-20;y+=45){fillRect(o.x+10,y,o.w-20,2,'#a1bcbc44')}}}
@@ -301,11 +522,91 @@ function drawObstacle(o){if(o.hp<=0)return;c.save();c.shadowColor='#0009';c.shad
 }
 function drawTracks(t){c.save();c.translate(t.x,t.y);c.rotate(t.a);c.fillStyle='#0008';c.beginPath();c.ellipse(2,6,35,27,0,0,TAU);c.fill();for(const side of [-1,1]){rounded(-31,side*19-8,63,16,5);c.fillStyle='#151f21';c.fill();c.strokeStyle='#39494a';c.lineWidth=3;c.stroke();for(let i=-24;i<29;i+=11){fillRect(i,side*19-6,3,12,'#75847a88')}}c.restore();}
 function drawTank(t){if(!t.alive)return;if(t.inv>0&&Math.floor(t.inv*13)%2===0){c.globalAlpha=.58}drawTracks(t);c.save();c.translate(t.x,t.y);c.rotate(t.a);rounded(-27,-21,54,42,8);c.fillStyle=t.dark;c.fill();c.strokeStyle=t.color;c.lineWidth=2.5;c.stroke();rounded(-21,-16,42,32,6);c.fillStyle=t.color;c.fill();fillRect(-19,-17,12,34,'#fff5');fillRect(14,-17,5,34,'#0003');rounded(-9,-7,34,14,4);c.fillStyle='#273a34';c.fill();c.fillStyle='#202e2d';rounded(6,-8,43,16,4);c.fill();c.fillStyle=t.color;rounded(6,-5,40,10,3);c.fill();fillRect(38,-3,11,6,'#13292a');c.beginPath();c.arc(0,0,18,0,TAU);c.fillStyle=t.dark;c.fill();c.lineWidth=3;c.strokeStyle=t.color;c.stroke();c.beginPath();c.arc(0,0,9,0,TAU);c.fillStyle='#304b40';c.fill();fillRect(-4,-3,8,6,t.color);fillRect(-19,-15,12,5,'#dae4b655');if(t.muzzle>0){c.fillStyle='#fff8aa';c.shadowColor='#ffcc55';c.shadowBlur=23;c.beginPath();c.moveTo(47,-11);c.lineTo(71,0);c.lineTo(47,11);c.lineTo(55,0);c.closePath();c.fill()}c.restore();
- c.globalAlpha=1;c.fillStyle='#0b1c20bb';rounded(t.x-25,t.y-47,50,7,4);c.fill();const f=t.hp/MAX_HP;rounded(t.x-24,t.y-46,48*f,5,3);c.fillStyle=t.hp===1?'#ff6d71':t.color;c.fill();c.font='900 12px ui-sans-serif, system-ui';c.fillStyle=t.color;c.textAlign='center';c.shadowColor='#000';c.shadowBlur=7;c.fillText('0'+t.id,t.x,t.y-54);c.shadowBlur=0;if(t.inv>.3){c.beginPath();c.arc(t.x,t.y,34,0,TAU);c.strokeStyle=t.color+'45';c.lineWidth=2;c.stroke();}}
+ c.globalAlpha=1;c.fillStyle='#0b1c20bb';rounded(t.x-25,t.y-47,50,7,4);c.fill();const f=t.hp/(t.maxHp||MAX_HP);rounded(t.x-24,t.y-46,48*f,5,3);c.fillStyle=t.hp===1?'#ff6d71':t.color;c.fill();c.font='900 12px ui-sans-serif, system-ui';c.fillStyle=t.color;c.textAlign='center';c.shadowColor='#000';c.shadowBlur=7;c.fillText(t.npc?'NPC':'0'+t.id,t.x,t.y-54);c.shadowBlur=0;if(t.inv>.3){c.beginPath();c.arc(t.x,t.y,34,0,TAU);c.strokeStyle=t.color+'45';c.lineWidth=2;c.stroke();}}
 function drawPickup(p){const y=p.y+Math.sin(p.spin*3)*5;c.save();c.translate(p.x,y);c.rotate(p.spin*.8);c.shadowColor='#83ffe8';c.shadowBlur=22;c.fillStyle='#264a4d';c.strokeStyle='#83ffe8';c.lineWidth=2;rounded(-16,-16,32,32,7);c.fill();c.stroke();fillRect(-3,-10,6,20,'#a1ffe4');fillRect(-10,-3,20,6,'#a1ffe4');c.restore();c.beginPath();c.arc(p.x,p.y,27+Math.sin(p.spin*4)*4,0,TAU);c.strokeStyle='#83ffe842';c.lineWidth=2;c.stroke();}
-function drawGame(){c.save();c.clearRect(0,0,W,H);c.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);drawBackdrop();if(game){for(const m of game.marks){c.save();c.globalAlpha=clamp(m.life/4.5,0,.2);c.translate(m.x,m.y);c.rotate(m.a);fillRect(-4,-3,8,6,'#0b1117');c.restore()}for(const o of game.obstacles)drawObstacle(o);for(const p of game.pickups)drawPickup(p);for(const t of game.tanks)drawTank(t);for(const b of game.bullets){c.save();c.strokeStyle='#ffe9a878';c.lineWidth=5;c.lineCap='round';c.beginPath();c.moveTo(b.x-b.vx*.016,b.y-b.vy*.016);c.lineTo(b.x,b.y);c.stroke();c.shadowColor='#ffe59b';c.shadowBlur=15;c.beginPath();c.arc(b.x,b.y,5,0,TAU);c.fillStyle='#fff2bc';c.fill();c.restore()}for(const p of game.particles){c.globalAlpha=clamp(p.life/p.max,0,1);fillRect(p.x,p.y,p.size,p.size,p.color)}c.globalAlpha=1;if(game.messageTimer>0&&phase==='playing'){let opacity=clamp(game.messageTimer*1.8,0,1);c.save();c.globalAlpha=opacity;c.textAlign='center';c.font='950 36px ui-sans-serif, system-ui';c.shadowColor='#000';c.shadowBlur=20;c.fillStyle='#f5f9df';c.fillText(game.message,W/2,105);c.restore()}}c.restore();}
-function resize(){const r=cv.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);const nw=Math.max(1,Math.round(r.width*dpr)),nh=Math.max(1,Math.round(r.height*dpr));if(cv.width!==nw)cv.width=nw;if(cv.height!==nh)cv.height=nh;const scale=Math.min(nw/W,nh/H);c.setTransform(scale,0,0,scale,(nw-W*scale)/2,(nh-H*scale)/2);drawGame();}
-function syncUI(){if(!game)return;ui.score1.textContent=game.scores[0];ui.score2.textContent=game.scores[1];ui.clock.textContent=`${String(Math.floor(game.time/60)).padStart(2,'0')}:${String(Math.floor(game.time%60)).padStart(2,'0')}`;ui.arena.textContent=maps[selectedMap].title;for(let i=0;i<2;i++){let e=i?ui.hp2:ui.hp1;const hp=game.tanks[i].alive?game.tanks[i].hp:0;e.innerHTML=Array.from({length:MAX_HP},(_,j)=>`<span class="hp ${j<hp?'on':''}"></span>`).join('');e.setAttribute('aria-label',`Spelare ${i+1}: ${hp} av ${MAX_HP} hälsa`)}}
+function getCameraTarget(){
+ let x=W/2,y=H/2,zoom=1;
+ if(game&&game.tanks){
+   if(mode==='online'){
+     const focus=game.tanks[net.role==='guest'?1:0];x=focus.x;y=focus.y;
+   }else if(mode==='bot'){
+     x=game.tanks[0].x;y=game.tanks[0].y;
+   }else if(phase==='playing'&&mode==='versus'){
+     const a=game.tanks[0],b=game.tanks[1];x=(a.x+b.x)/2;y=(a.y+b.y)/2;
+     zoom=clamp(Math.max(1,Math.abs(a.x-b.x)/(VW-240),Math.abs(a.y-b.y)/(VH-190)),1,Math.min(W/VW,H/VH));
+   }
+ }
+ return{x:clamp(x-VW*zoom/2,0,W-VW*zoom),y:clamp(y-VH*zoom/2,0,H-VH*zoom),zoom};
+}
+function drawMiniMap(cam){
+ if(!game)return;
+ const mw=200,mh=mw*H/W,mx=VW-mw-19,my=20;
+ c.save();c.fillStyle='#08131aeb';c.strokeStyle='#6d9caaa0';c.lineWidth=2;
+ rounded(mx-8,my-8,mw+16,mh+30,10);c.fill();c.stroke();
+ c.translate(mx,my);c.scale(mw/W,mh/H);
+ fillRect(0,0,W,H,'#21352f');
+ for(const o of game.obstacles){if(o.hp>0)fillRect(o.x,o.y,o.w,o.h,o.t==='steel'?'#869fa2':'#9a7b58');}
+ c.strokeStyle='#55ecff';c.lineWidth=24;c.beginPath();
+ c.moveTo(EDGE,H/2-GATE_Y);c.lineTo(EDGE,H/2+GATE_Y);
+ c.moveTo(W-EDGE,H/2-GATE_Y);c.lineTo(W-EDGE,H/2+GATE_Y);
+ c.moveTo(W/2-GATE_X,EDGE);c.lineTo(W/2+GATE_X,EDGE);
+ c.moveTo(W/2-GATE_X,H-EDGE);c.lineTo(W/2+GATE_X,H-EDGE);c.stroke();
+ for(const t of [...game.tanks,...game.npcs]){
+   if(!t.alive)continue;
+   c.beginPath();c.arc(t.x,t.y,t.npc?38:48,0,TAU);c.fillStyle=t.color;c.fill();
+ }
+ c.strokeStyle='#f1f7ffc2';c.lineWidth=17;c.strokeRect(cam.x,cam.y,VW*cam.zoom,VH*cam.zoom);
+ c.restore();
+ c.fillStyle='#badde3';c.font='900 13px ui-sans-serif,system-ui';c.textAlign='left';c.fillText('RADAR / HELA KARTAN',mx,my+mh+17);
+}
+function drawGame(){
+ c.save();c.clearRect(0,0,VW,VH);
+ fillRect(0,0,VW,VH,'#0c1b20');
+ const goal=getCameraTarget();
+ if(!camera.ready||Math.abs(goal.x-camera.x)>470||Math.abs(goal.y-camera.y)>350){
+   camera.x=goal.x;camera.y=goal.y;camera.zoom=goal.zoom;camera.ready=true;
+ }else{
+   const k=.16;camera.x+=(goal.x-camera.x)*k;camera.y+=(goal.y-camera.y)*k;
+   camera.zoom+=(goal.zoom-camera.zoom)*.1;
+ }
+ const cam=camera;
+ c.save();c.scale(1/cam.zoom,1/cam.zoom);c.translate(-cam.x+((Math.random()-.5)*shake),-cam.y+((Math.random()-.5)*shake));
+ drawBackdrop();
+ if(game){
+   for(const m of game.marks){c.save();c.globalAlpha=clamp(m.life/4.5,0,.2);c.translate(m.x,m.y);c.rotate(m.a);fillRect(-4,-3,8,6,'#0b1117');c.restore();}
+   for(const o of game.obstacles)drawObstacle(o);
+   for(const p of game.pickups)drawPickup(p);
+   for(const t of [...game.tanks,...game.npcs])drawTank(t);
+   for(const b of game.bullets){
+     c.save();c.strokeStyle=b.owner>=100?'#c3b3ff9b':'#ffe9a878';c.lineWidth=5;c.lineCap='round';
+     c.beginPath();c.moveTo(b.x-b.vx*.016,b.y-b.vy*.016);c.lineTo(b.x,b.y);c.stroke();
+     c.shadowColor=b.owner>=100?'#9e79ff':'#ffe59b';c.shadowBlur=15;
+     c.beginPath();c.arc(b.x,b.y,5,0,TAU);c.fillStyle=b.owner>=100?'#d8c8ff':'#fff2bc';c.fill();c.restore();
+   }
+   for(const p of game.particles){c.globalAlpha=clamp(p.life/p.max,0,1);fillRect(p.x,p.y,p.size,p.size,p.color);}
+   c.globalAlpha=1;
+ }
+ c.restore();
+ if(game){
+   drawMiniMap(cam);
+   if(game.messageTimer>0&&phase==='playing'){
+     c.save();c.globalAlpha=clamp(game.messageTimer*1.8,0,1);c.textAlign='center';
+     c.font='950 32px ui-sans-serif,system-ui';c.shadowColor='#000';c.shadowBlur=24;
+     c.fillStyle=game.message.includes('FIENDEN')?'#d9c9ff':'#f5f9df';
+     c.fillText(game.message,VW/2,96);c.restore();
+   }
+ }
+ c.restore();
+}
+function resize(){
+ const r=cv.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);
+ const nw=Math.max(1,Math.round(r.width*dpr)),nh=Math.max(1,Math.round(r.height*dpr));
+ if(cv.width!==nw)cv.width=nw;if(cv.height!==nh)cv.height=nh;
+ const scale=Math.min(nw/VW,nh/VH);
+ c.setTransform(scale,0,0,scale,(nw-VW*scale)/2,(nh-VH*scale)/2);
+ drawGame();
+}
+function syncUI(){if(!game)return;ui.score1.textContent=game.scores[0];ui.score2.textContent=game.scores[1];ui.clock.textContent=`${String(Math.floor(game.time/60)).padStart(2,'0')}:${String(Math.floor(game.time%60)).padStart(2,'0')}`;ui.arena.textContent=maps[selectedMap].title;const active=(game.npcs||[]).length;$('npcStatus').textContent=active?`⚠ ${active} NPC-FIENDE${active===1?'':'R'}`:'NPC: VÄNTAR';for(let i=0;i<2;i++){let e=i?ui.hp2:ui.hp1;const hp=game.tanks[i].alive?game.tanks[i].hp:0;e.innerHTML=Array.from({length:MAX_HP},(_,j)=>`<span class="hp ${j<hp?'on':''}"></span>`).join('');e.setAttribute('aria-label',`Spelare ${i+1}: ${hp} av ${MAX_HP} hälsa`)}}
 function showPanel(which){document.body.classList.toggle('match-active',which==='none'&&phase==='playing');ui.overlay.hidden=which==='none';ui.menu.hidden=which!=='menu';ui.pause.hidden=which!=='pause';ui.win.hidden=which!=='win';$('onlineScreen').hidden=which!=='online';ui.pauseLabel.textContent=mode==='online'?'ONLINE':phase==='paused'?'FORTSÄTT':'PAUS';ui.pauseBtn.disabled=mode==='online';ui.pauseBtn.setAttribute('aria-label',mode==='online'?'Online-match utan paus':phase==='paused'?'Fortsätt spelet':'Pausa spelet');ui.status.textContent=phase==='playing'?'MATCH PÅGÅR':phase==='paused'?'MATCH PAUSAD':phase==='win'?'MATCH AVSLUTAD':which==='online'?'ONLINE / VÄNTAR':'REDO FÖR STRID';requestAnimationFrame(resize);}
 function showWin(t){const who=t.id===1?'GRÖN':mode==='bot'?'DATORN':'ORANGE';$('winTitle').innerHTML=who+' <span class="accent">VINNER!</span>';$('winTitle').style.color=t.color;$('winDescription').textContent=t.id===1?'Snyggt kört! Vill du försvara din titel?':'En imponerande seger. Dags för revansch?';$('winScore1').textContent=game.scores[0];$('winScore2').textContent=game.scores[1];showPanel('win')}
 function startGame(){keys.clear();clearTouch();resetGame();phase='playing';ui.p2Name.textContent=mode==='bot'?'DATORN / AI':mode==='online'?'MOTSTÅNDARE ONLINE':'SPELARE 02';$('touchP2').style.display=(mode==='bot'||mode==='online')?'none':'';document.querySelector('.touch-group .touch-header').textContent=mode==='online'&&net.role==='guest'?'02 / ORANGE':'01 / GRÖN';$('touchpanel').classList.toggle('guest',mode==='online'&&net.role==='guest');$('rematchHint').hidden=!(mode==='online'&&net.role==='guest');$('againBtn').hidden=mode==='online'&&net.role==='guest';showPanel('none');if(window.matchMedia('(pointer:coarse), (max-width:700px)').matches)requestAnimationFrame(()=>window.scrollTo(0,0));try{ctxAudio=ctxAudio||new (window.AudioContext||window.webkitAudioContext)();ctxAudio.resume()}catch(e){}}
@@ -344,7 +645,7 @@ function handleNetworkMessage(msg){
  if(msg.type==='peer'){net.peer=!!msg.connected;if(!net.peer){remoteInput={f:false,b:false,l:false,r:false,shoot:false};resetGame();}showOnlineLobby();return;}
  if(msg.type==='input'&&net.role==='host'&&msg.u){remoteInput={f:!!msg.u.f,b:!!msg.u.b,l:!!msg.u.l,r:!!msg.u.r,shoot:!!msg.u.shoot};return;}
  if(msg.type==='start'){applyMap(msg.map);remoteInput={f:false,b:false,l:false,r:false,shoot:false};net.lastState=0;net.lastInput=0;startGame();return;}
- if(msg.type==='state'&&net.role==='guest'&&msg.state){game=msg.state;if(Number.isInteger(msg.map))selectedMap=msg.map;syncUI();return;}
+ if(msg.type==='state'&&net.role==='guest'&&msg.state){game=msg.state;if(!game.npcs)game.npcs=[];if(Number.isInteger(msg.map))selectedMap=msg.map;syncUI();return;}
  if(msg.type==='complete'&&net.role==='guest'){if(game){phase='win';showWin(game.tanks[msg.winner===2?1:0]);}return;}
  if(msg.type==='closed'){leaveOnline();phase='menu';resetGame();setMode('online');showPanel('menu');showNetError(msg.reason||'Rummet stängdes.');}
 }
