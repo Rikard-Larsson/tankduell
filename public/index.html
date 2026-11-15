@@ -245,7 +245,7 @@ function openOnline(action, code){
  ws.onmessage=e=>{if(net.ws!==ws)return;try{handleNetworkMessage(JSON.parse(e.data))}catch(err){console.warn('Ogiltigt servermeddelande',err)}};
  ws.onerror=()=>{};
  ws.onclose=()=>{if(net.ws!==ws)return;net.ws=null;net.role=null;net.peer=false;net.code='';remoteInput={f:false,b:false,l:false,r:false,shoot:false};keys.clear();phase='menu';resetGame();setMode('online');showPanel('menu');showNetError('Anslutningen bröts. Kontrollera att onlineservern är igång och försök igen.');};
- setTimeout(()=>{if(net.ws===ws&&ws.readyState===0){ws.close();showNetError('Servern svarar inte.')}} ,8000);
+ setTimeout(()=>{if(net.ws===ws&&ws.readyState===0){ws.close();showNetError('Servern svarar inte.')}} ,9000);
  ws.addEventListener('open',()=>{ $('startBtn').disabled=false;$('joinBtn').disabled=false;});
  ws.addEventListener('close',()=>{ $('startBtn').disabled=false;$('joinBtn').disabled=false;});
 }
